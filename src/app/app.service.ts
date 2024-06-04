@@ -2,34 +2,32 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { asleep } from 'src/shared/utils/wait.utils';
 import { APP } from './app.config';
-import { UserService } from 'src/userPosition/userPositionState.service';
-import { BybitService } from 'src/exchanges/bybit/bybit.service';
+import { CopyService } from 'src/copy/copy.service';
 
 @Injectable()
 export class AppService {
   constructor(
     private event: EventEmitter2,
-    private user: UserService,
-    private bybit: BybitService,
+    private copy: CopyService,
   ) {}
 
   async onApplicationBootstrap() {
     this.event.emit(APP.RUN);
-    console.log('END');
   }
 
   @OnEvent(APP.RUN)
   async boot() {
+    console.log(process.env.TZ);
     let canRun = true;
     let isDelay = true;
     while (canRun) {
-      canRun = true;
+      canRun = false;
       isDelay = true;
-      console.log('looping');
       try {
-        console.log(this.user.getPositions());
+        await this.copy.copy();
         // RUNNING CODE FREEZE LOGIC
       } catch (error: any) {
+        console.log(error);
         // HANDLE CODE FREEZE ERRORS
         canRun = false;
         isDelay = true;

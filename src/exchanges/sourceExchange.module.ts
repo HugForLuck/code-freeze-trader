@@ -1,10 +1,8 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { BybitModule } from './bybit/bybit.module';
 
-@Module({})
-export class SourceExchangeModule {
-  static register(): DynamicModule {
-    return {
-      module: SourceExchangeModule,
-    };
-  }
-}
+@Module({
+  imports: [BybitModule],
+  exports: [BybitModule],
+})
+export class ExchangeModule {}
