@@ -1,6 +1,6 @@
-import { STORE_STATE } from 'src/store/storeState.enum';
 import { ICopyPosition } from './copyPosition.interface';
 import { Injectable } from '@nestjs/common';
+import { COPYPOSITION_STATE } from './copyPositionState.enum';
 
 /**
  *
@@ -14,11 +14,11 @@ export class CopyPositionStore {
    * contains the state of the store/data
    *
    */
-  private _state = STORE_STATE.WAIT_FOR_SYNC;
+  private _state = COPYPOSITION_STATE.WAIT_FOR_SYNC;
   get state() {
     return this._state;
   }
-  set state(value: STORE_STATE) {
+  set state(value: COPYPOSITION_STATE) {
     console.log(`changing state from ${this.state} to ${value}`);
     this._state = value;
   }

@@ -11,6 +11,7 @@ import { BybitResponse } from './responses/bybitResponse.type';
 @Injectable()
 export class BybitClientService {
   recvWindow = '5000';
+  url = CONFIG().BYBIT.URL;
 
   constructor(
     private readonly ntp: NTPService,
@@ -21,8 +22,8 @@ export class BybitClientService {
     const timestamp = (await this.ntp.getTime()).toString();
     const query = getQuery(request.params);
     const config = getAxiosConfig(timestamp, query, this.recvWindow);
-    const url = CONFIG().BYBIT.URL + `${request.endPoint}?${query}`;
-    const response = await lastValueFrom(this.http.get(url, config));
+    this.url += `${request.endPoint}?${query}`;
+    const response = await lastValueFrom(this.http.get(this.url, config));
     return response.data;
   }
 }

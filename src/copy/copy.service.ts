@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CopyPositionStore as CopyPositionStore } from './copyPosition.store';
 import { COPY_POSITION } from './copyPosition.enum';
 import { OnEvent } from '@nestjs/event-emitter';
-import { STORE_STATE } from 'src/store/storeState.enum';
 import { BybitMiddleware } from 'src/exchanges/bybit/bybit.middleware';
+import { COPYPOSITION_STATE } from './copyPositionState.enum';
 
 /**
  *
@@ -21,8 +21,9 @@ export class CopyPositionService {
   @OnEvent(COPY_POSITION.INIT)
   async init() {
     const copyPositions = await this.bybit.getUserLivePositions();
-    this.copyPositionStore.state = STORE_STATE.SYNCING;
+    this.copyPositionStore.state = COPYPOSITION_STATE.SYNCING;
     this.copyPositionStore.addPositions(copyPositions);
-    this.copyPositionStore.state = STORE_STATE.SYNCED;
+    this.copyPositionStore.state = COPYPOSITION_STATE.LIVE_POSITION_LOADED;
+    console.log(this.copyPositionStore.positions);
   }
 }

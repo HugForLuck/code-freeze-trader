@@ -3,6 +3,11 @@ import { ICopyPosition } from 'src/copy/copyPosition.interface';
 import { BybitService } from 'src/exchanges/bybit/bybit.service';
 import { SIDE } from '../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
+import { IPositionInfo } from './responses/positionInfoResponse.interface';
+import { CopyPosition } from 'src/copy/copyPosition';
+import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
+import { isSIDE } from './utils/isSide.utils';
+import isNumber from 'src/shared/utils/isNumber.utils';
 
 /**
  *
@@ -25,5 +30,22 @@ export class BybitMiddleware {
       if (+p.size > 0) copyPositions.push(copyPosition);
     }
     return copyPositions;
+  }
+
+  mapToCopyPosition(position: IPositionInfo): CopyPosition | null {
+    if (!this.isValid) return null; // TODO fire event to handle server/stop server
+    const p = new CopyPosition();
+    p.symbol = position.symbol;
+    p.dir = position.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;
+    p.liveQty = +position.size;
+    return p;
+  }
+
+  private isValid(position: IPositionInfo): boolean {
+    if (position == null) return false;
+    const symbolIsValid = isSYMBOL(position.symbol);
+    const sideIsValid = isSIDE(position.side);
+    const size = isNumber(position.size);
+    return symbolIsValid && sideIsValid && size;
   }
 }

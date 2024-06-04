@@ -15,4 +15,6 @@ export class CopyPosition {
 
   @Column()
   maxAvailableBalance: number;
+
+  liveQty: number;
 }

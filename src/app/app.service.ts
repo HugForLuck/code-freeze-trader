@@ -13,7 +13,7 @@ export class AppService {
   ) {}
 
   async onApplicationBootstrap() {
-    this.event.emit(APP.RUN);
+    // this.event.emit(APP.RUN);
     this.event.emit(COPY_POSITION.INIT);
   }
 
