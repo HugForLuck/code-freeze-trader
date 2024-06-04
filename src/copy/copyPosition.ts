@@ -2,7 +2,7 @@ import { SYMBOL } from 'src/exchanges/api/symbol.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'copy_positions' })
 export class CopyPosition {
   @PrimaryColumn()
   symbol: SYMBOL;

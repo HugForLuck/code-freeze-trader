@@ -6,6 +6,9 @@ import { ExchangeModule } from 'src/exchanges/sourceExchange.module';
 import { ConfigModule } from '@nestjs/config';
 import { CONFIG } from './app.config';
 import { CopyModule } from 'src/copy/copy.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DBModule } from 'src/db/db.module';
+import { TypeOrmConfigService } from 'src/db/typeorm.config';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -14,6 +17,10 @@ import { CopyModule } from 'src/copy/copy.module';
       load: [CONFIG],
     }),
     EventEmitterModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfigService,
+    }),
+    DBModule,
     CopyModule,
     ExchangeModule,
   ],
