@@ -35,8 +35,13 @@ export class CopyPositionStore {
     return this._positions;
   }
 
+  set positions(value: ICopyPosition[]) {
+    console.log('Setting copy positions', value);
+    this._positions = value;
+  }
+
   addPositions(value: ICopyPosition[]) {
     console.log('Adding copy positions', value);
-    this._positions = value;
+    this._positions.push(...value);
   }
 }
