@@ -7,7 +7,7 @@ export function getSign(
   timestamp: string | number,
   recvWindow: string | number,
   query: string,
-  body: TObject | null,
+  body: TObject | null = null,
 ) {
   const { KEY, SECRET } = CONFIG().BYBIT;
   const signString = timestamp + KEY + recvWindow + query + toString(body);

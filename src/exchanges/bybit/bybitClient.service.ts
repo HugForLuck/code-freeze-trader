@@ -2,13 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { NTPService } from '../api/ntp.service';
 import { BybitRequest } from './requests/bybitRequest';
 import { getQuery } from '../api/utils/getQuery.utils';
-import { getSign } from './utils/getSign.utils';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
 import { getAxiosConfig } from './utils/getConfig.utils';
+import { CONFIG } from 'src/app/app.config';
 
 @Injectable()
 export class BybitClientService {
+  recvWindow = '5000';
+
   constructor(
     private readonly ntp: NTPService,
     private readonly http: HttpService,
@@ -17,11 +19,8 @@ export class BybitClientService {
   async get(request: BybitRequest) {
     const timestamp = (await this.ntp.getTime()).toString();
     const query = getQuery(request.params);
-    const body = null;
-    const recvWindow = '5000';
-    const signature = getSign(timestamp, recvWindow, query, body);
-    const config = getAxiosConfig(timestamp, signature, recvWindow);
-    const url = `https://api-demo.bybit.com${request.endPoint}?${query}`;
+    const config = getAxiosConfig(timestamp, query, this.recvWindow);
+    const url = CONFIG().BYBIT.URL + `${request.endPoint}?${query}`;
     const response = await lastValueFrom(this.http.get(url, config));
     return response;
   }

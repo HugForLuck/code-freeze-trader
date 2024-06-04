@@ -1,9 +1,13 @@
 import { getHeaders } from './getHeaders.utils';
+import { getSign } from './getSign.utils';
 
 export const getAxiosConfig = (
   timestamp: string,
-  sign: string,
+  query: string,
   recvWindow = '5000',
-) => ({
-  headers: getHeaders(timestamp, sign, recvWindow),
-});
+) => {
+  const sign = getSign(timestamp, recvWindow, query);
+  return {
+    headers: getHeaders(timestamp, sign, recvWindow),
+  };
+};
