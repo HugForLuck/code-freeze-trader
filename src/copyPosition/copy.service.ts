@@ -20,9 +20,9 @@ export class CopyPositionService {
 
   @OnEvent(COPY_POSITION.INIT)
   async init() {
-    const response = await this.bybit.getUserLivePositions();
+    const copyPositions = await this.bybit.getUserLivePositions();
     this.copyPositionStore.state = STORE_STATE.SYNCING;
-    console.log(response);
+    this.copyPositionStore.addPositions(copyPositions);
     this.copyPositionStore.state = STORE_STATE.SYNCED;
   }
 }

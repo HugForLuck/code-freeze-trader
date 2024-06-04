@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { ICopyPosition } from 'src/copyPosition/copyPosition.interface';
 import { BybitService } from 'src/exchanges/bybit/bybit.service';
+import { SIDE } from '../api/side.enum';
+import { DIR } from 'src/shared/enums/dir.enum';
 
 /**
  *
@@ -11,7 +14,16 @@ export class BybitMiddleware {
   constructor(private readonly bybit: BybitService) {}
 
   async getUserLivePositions() {
-    const response = await this.bybit.getUserLivePositions();
-    console.log(response);
+    const bybitPositions = await this.bybit.getUserLivePositions();
+    const copyPositions: ICopyPosition[] = [];
+    for (const p of bybitPositions) {
+      const copyPosition: ICopyPosition = {
+        symbol: p.symbol,
+        dir: p.side == SIDE.BUY ? DIR.LONG : DIR.SHORT,
+        liveQty: +p.size,
+      };
+      if (+p.size > 0) copyPositions.push(copyPosition);
+    }
+    return copyPositions;
   }
 }

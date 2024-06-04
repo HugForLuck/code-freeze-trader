@@ -9,6 +9,11 @@ import { Injectable } from '@nestjs/common';
  */
 @Injectable()
 export class CopyPositionStore {
+  /**
+   *
+   * contains the state of the store/data
+   *
+   */
   private _state = STORE_STATE.WAIT_FOR_SYNC;
   get state() {
     return this._state;
@@ -18,10 +23,20 @@ export class CopyPositionStore {
     this._state = value;
   }
 
-  data: ICopyPosition[];
+  /**
+   *
+   * contains the actual data
+   *
+   */
+  private _positions: ICopyPosition[];
 
-  getPositions() {
+  get positions() {
     console.log('Reading user state');
-    return this.data;
+    return this._positions;
+  }
+
+  addPositions(value: ICopyPosition[]) {
+    console.log('Adding copy positions', value);
+    this._positions = value;
   }
 }
