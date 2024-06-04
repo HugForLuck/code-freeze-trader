@@ -2,11 +2,10 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { UserService } from 'src/userPosition/userPositionState.service';
 import { ExchangeModule } from 'src/exchanges/sourceExchange.module';
-import { CopyModule } from 'src/copy/copy.module';
 import { ConfigModule } from '@nestjs/config';
 import { CONFIG } from './app.config';
+import { CopyModule } from 'src/copyPosition/copy.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,6 +18,6 @@ import { CONFIG } from './app.config';
     ExchangeModule,
   ],
   controllers: [AppController],
-  providers: [AppService, UserService],
+  providers: [AppService],
 })
 export class AppModule {}

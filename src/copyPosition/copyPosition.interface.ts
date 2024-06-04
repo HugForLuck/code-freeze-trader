@@ -1,4 +1,4 @@
-export interface IUserPosition {
+export interface ICopyPosition {
   symbol: string;
   dir: string;
   maxAvailableBalance: number;
