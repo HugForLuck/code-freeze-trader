@@ -28,7 +28,7 @@ export class CopyPositionStore {
    * contains the actual data
    *
    */
-  private _positions: ICopyPosition[];
+  private _positions: ICopyPosition[] = [];
 
   get positions() {
     console.log('Reading user state');
