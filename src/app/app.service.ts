@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { asleep } from 'src/shared/utils/wait.utils';
 import { APP } from './app.config';
-import { COPY_POSITION } from 'src/copyPosition/copyPosition.enum';
-import { CopyPositionService } from 'src/copyPosition/copy.service';
+import { COPY_POSITION } from 'src/copy/copyPosition.enum';
+import { CopyPositionService } from 'src/copy/copy.service';
 
 @Injectable()
 export class AppService {

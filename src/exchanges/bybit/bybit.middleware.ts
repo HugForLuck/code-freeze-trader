@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { ICopyPosition } from 'src/copyPosition/copyPosition.interface';
+import { ICopyPosition } from 'src/copy/copyPosition.interface';
 import { BybitService } from 'src/exchanges/bybit/bybit.service';
 import { SIDE } from '../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';

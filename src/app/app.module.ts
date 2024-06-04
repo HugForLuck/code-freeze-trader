@@ -5,7 +5,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ExchangeModule } from 'src/exchanges/sourceExchange.module';
 import { ConfigModule } from '@nestjs/config';
 import { CONFIG } from './app.config';
-import { CopyModule } from 'src/copyPosition/copy.module';
+import { CopyModule } from 'src/copy/copy.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
