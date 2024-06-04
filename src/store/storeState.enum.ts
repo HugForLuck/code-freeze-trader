@@ -1,0 +1,5 @@
+export enum STORE_STATE {
+  NOT_SYNCED = 'NOT_SYNCED',
+  SYNCED = 'SYNCED',
+  ERROR = 'ERRORED',
+}
