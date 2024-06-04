@@ -17,7 +17,7 @@ export class AppService {
 
   @OnEvent(APP.RUN)
   async boot() {
-    console.log(process.env.TZ);
+    console.log('🔵', process.env.BYBIT_KEY);
     let canRun = true;
     let isDelay = true;
     while (canRun) {
