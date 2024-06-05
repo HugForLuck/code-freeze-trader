@@ -4,6 +4,7 @@ import { COPY_POSITION } from './copyPosition.enum';
 import { OnEvent } from '@nestjs/event-emitter';
 import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.middleware';
 import { COPYPOSITION_STATE } from './copyPositionState.enum';
+import { tap } from 'rxjs';
 
 /**
  *
@@ -21,9 +22,17 @@ export class CopyPositionService {
   @OnEvent(COPY_POSITION.INIT)
   async init() {
     const copyPositions = await this.bybit.getUserLivePositions();
-    this.copyPositionStore.state = COPYPOSITION_STATE.SYNCING;
-    this.copyPositionStore.addPositions(copyPositions);
-    this.copyPositionStore.state = COPYPOSITION_STATE.LIVE_POSITION_LOADED;
+    // this.copyPositionStore.state = COPYPOSITION_STATE.SYNCING;
+    // this.copyPositionStore.addPositions(copyPositions);
+    // this.copyPositionStore.state = COPYPOSITION_STATE.LOADED;
     console.log(this.copyPositionStore.positions);
+    this.bybit
+      .getUserLivePositions$()
+      .pipe(
+        tap((livePositions) =>
+          this.copyPositionStore.getPatchedPositions(livePositions),
+        ),
+      )
+      .subscribe();
   }
 }

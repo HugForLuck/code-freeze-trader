@@ -4,10 +4,11 @@ import { BybitService } from 'src/exchanges/bybit/http/bybit.service';
 import { SIDE } from '../../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
 import { IPositionInfo } from './responses/positionInfoResponse.interface';
-import { CopyPosition } from 'src/copy/copyPosition';
+import { CopyPosition } from 'src/copy/copyPosition.entity';
 import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
 import { isSIDE } from '../utils/isSide.utils';
 import isNumber from 'src/shared/utils/isNumber.utils';
+import { from, map, switchMap, timer } from 'rxjs';
 
 /**
  *
@@ -18,7 +19,7 @@ import isNumber from 'src/shared/utils/isNumber.utils';
 export class BybitMiddleware {
   constructor(private readonly bybit: BybitService) {}
 
-  async getUserLivePositions() {
+  async getUserLivePositions(): Promise<ICopyPosition[]> {
     const bybitPositions = await this.bybit.getUserLivePositions();
     const copyPositions: ICopyPosition[] = [];
     for (const p of bybitPositions) {
@@ -32,8 +33,17 @@ export class BybitMiddleware {
     return copyPositions;
   }
 
-  mapToCopyPosition(position: IPositionInfo): CopyPosition | null {
-    if (!this.isValid) return null; // TODO fire event to handle server/stop server
+  getUserLivePositions$() {
+    return timer(0, 1000).pipe(
+      switchMap(() =>
+        from(this.bybit.getUserLivePositions()).pipe(
+          map((bybitPos) => bybitPos.map((p) => this.mapToCopyPosition(p))),
+        ),
+      ),
+    );
+  }
+
+  mapToCopyPosition(position: IPositionInfo): CopyPosition {
     const p = new CopyPosition();
     p.symbol = position.symbol;
     p.dir = position.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;

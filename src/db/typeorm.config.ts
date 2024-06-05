@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CONFIG } from 'src/app/app.config';
-import { CopyPosition } from 'src/copy/copyPosition';
+import { CopyPosition } from 'src/copy/copyPosition.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {

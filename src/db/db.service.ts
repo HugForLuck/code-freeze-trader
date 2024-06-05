@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CopyPosition } from 'src/copy/copyPosition';
+import { CopyPosition } from 'src/copy/copyPosition.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
