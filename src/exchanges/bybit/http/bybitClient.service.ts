@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { NTPService } from '../api/ntp.service';
+import { NTPService } from '../../api/ntp.service';
 import { BybitRequest } from './requests/bybitRequest';
-import { getQuery } from '../api/utils/getQuery.utils';
+import { getQuery } from '../../api/utils/getQuery.utils';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { getAxiosConfig } from './utils/getConfig.utils';
+import { getAxiosConfig } from '../utils/getConfig.utils';
 import { CONFIG } from 'src/app/app.config';
 import { BybitResponse } from './responses/bybitResponse.type';
 

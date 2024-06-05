@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ICopyPosition } from 'src/copy/copyPosition.interface';
-import { BybitService } from 'src/exchanges/bybit/bybit.service';
-import { SIDE } from '../api/side.enum';
+import { BybitService } from 'src/exchanges/bybit/http/bybit.service';
+import { SIDE } from '../../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
 import { IPositionInfo } from './responses/positionInfoResponse.interface';
 import { CopyPosition } from 'src/copy/copyPosition';
 import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
-import { isSIDE } from './utils/isSide.utils';
+import { isSIDE } from '../utils/isSide.utils';
 import isNumber from 'src/shared/utils/isNumber.utils';
 
 /**

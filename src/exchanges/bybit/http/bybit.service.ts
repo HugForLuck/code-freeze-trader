@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NTPService } from '../api/ntp.service';
+import { NTPService } from '../../api/ntp.service';
 import { UserLivePositionRequest } from './requests/userLivePositionRequest';
 import { BybitClientService } from './bybitClient.service';
 import {
