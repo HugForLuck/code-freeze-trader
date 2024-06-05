@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CopyPositionStore as CopyPositionStore } from './copyPosition.store';
 import { COPY_POSITION } from './copyPosition.enum';
 import { OnEvent } from '@nestjs/event-emitter';
-import { BybitMiddleware } from 'src/exchanges/bybit/bybit.middleware';
+import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.middleware';
 import { COPYPOSITION_STATE } from './copyPositionState.enum';
 
 /**

@@ -3,7 +3,7 @@ import { TObject } from 'src/shared/types/object.type';
 import { sign } from 'src/shared/utils/sign.utils';
 import { toString } from 'src/shared/utils/toString.utils';
 
-export function getSign(
+export function getHttpSign(
   timestamp: string | number,
   recvWindow: string | number,
   query: string,

@@ -1,4 +1,4 @@
-import { getBybitHttpUrl } from 'src/exchanges/bybit/utils/getUrl.utils';
+import { getBybitHttpUrl } from 'src/exchanges/bybit/http/utils/getHttpUrl.utils';
 
 export enum APP {
   RUN = 'RUN',

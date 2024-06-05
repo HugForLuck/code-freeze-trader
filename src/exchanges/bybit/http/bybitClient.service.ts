@@ -4,7 +4,7 @@ import { BybitRequest } from './requests/bybitRequest';
 import { getQuery } from '../../api/utils/getQuery.utils';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
-import { getAxiosConfig } from '../utils/getConfig.utils';
+import { getHttpConfig } from './utils/getConfig.utils';
 import { CONFIG } from 'src/app/app.config';
 import { BybitResponse } from './responses/bybitResponse.type';
 
@@ -21,7 +21,7 @@ export class BybitClientService {
   async get<T>(request: BybitRequest): Promise<BybitResponse<T>> {
     const timestamp = (await this.ntp.getTime()).toString();
     const query = getQuery(request.params);
-    const config = getAxiosConfig(timestamp, query, this.recvWindow);
+    const config = getHttpConfig(timestamp, query, this.recvWindow);
     this.url += `${request.endPoint}?${query}`;
     const response = await lastValueFrom(this.http.get(this.url, config));
     return response.data;
