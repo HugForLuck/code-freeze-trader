@@ -11,7 +11,7 @@ import { BybitResponse } from './responses/bybitResponse.type';
 @Injectable()
 export class BybitClientService {
   recvWindow = '5000';
-  url = CONFIG().BYBIT.URL;
+  url = CONFIG().BYBIT.HTTP_URL;
 
   constructor(
     private readonly ntp: NTPService,
