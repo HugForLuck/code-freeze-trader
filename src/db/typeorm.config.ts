@@ -2,11 +2,11 @@ import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CONFIG } from 'src/app/app.config';
 import { Copy } from 'src/copy/copy.entity';
-import { CopySymbol } from 'src/copy/copySymbols/copySymbol.entity';
+import { AllowedSymbol } from 'src/copy/copySymbols/copySymbol.entity';
 import { Strategy } from 'src/copy/strategy/strategy.entity';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
 
-export const entities = [Copy, TargetPosition, Strategy, CopySymbol];
+export const entities = [Copy, TargetPosition, Strategy, AllowedSymbol];
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {

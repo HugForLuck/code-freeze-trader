@@ -1,7 +1,7 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
-import { CopySymbol } from 'src/copy/copySymbols/copySymbol.entity';
-import { STRATEGY } from './strategy.enum';
+import { AllowedSymbol } from 'src/copy/copySymbols/copySymbol.entity';
 import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.utils';
+import { STRATEGY } from './strategy.enum';
 /**
  *
  * Stores different types of strategies, e.g. 1 symbol at a time,
@@ -11,7 +11,7 @@ import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.
 @Entity({ name: 'strategies' })
 export class Strategy {
   @PrimaryColumn()
-  id: STRATEGY;
+  strategyId: STRATEGY;
 
   @Column({ default: 50 })
   maxOrdersPerSymbol: number;
@@ -24,15 +24,15 @@ export class Strategy {
   })
   maxPriceChange: number;
 
-  @Column({ default: 1 })
+  @Column({ default: 2 })
   maxSymbols: number;
 
-  @ManyToMany(() => CopySymbol, (symbol) => symbol.strategies, {
+  @ManyToMany(() => AllowedSymbol, (symbol) => symbol.strategies, {
     eager: true,
     cascade: true,
   })
   @JoinTable({ name: 'symbols2strategies' })
-  symbols: CopySymbol[];
+  symbols: AllowedSymbol[];
 
   @Column({ default: false })
   isActive: boolean;

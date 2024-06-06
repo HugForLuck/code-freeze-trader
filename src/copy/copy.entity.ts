@@ -1,8 +1,15 @@
 import { SYMBOL } from 'src/exchanges/api/symbol.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
-import { Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { TARGET_EXCHAGE } from './targetExchange.enum';
 import { TargetPosition } from './targetPositions/targetPosition.entity';
+import { Strategy } from './strategy/strategy.entity';
 
 @Entity()
 export class Copy {
@@ -22,4 +29,8 @@ export class Copy {
     { name: 'targetExchange', referencedColumnName: 'targetExchange' },
   ])
   targetPosition: TargetPosition;
+
+  @ManyToOne(() => Strategy, { eager: true })
+  @JoinColumn({ name: 'strategyId' })
+  strategy: Strategy;
 }
