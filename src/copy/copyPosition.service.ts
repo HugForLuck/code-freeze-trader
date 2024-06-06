@@ -33,6 +33,9 @@ export class CopyPositionService {
       .pipe(tap((pos) => this.copyPositionStore.patchPositions(pos)))
       .subscribe();
     const strategy = await this.db.getActiveStrategy();
+    // TODO check if strategy is compliant with current live positions
+    // if not throw error
+    // if yes load continue copy process (load data, create order, place order)
     console.log(strategy);
   }
 }
