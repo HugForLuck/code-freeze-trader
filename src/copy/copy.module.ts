@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CopyPositionService } from './copy.service';
+import { CopyPositionService } from './copyPosition.service';
 import { BybitModule } from 'src/exchanges/bybit/bybit.module';
 import { CopyPositionStore } from './copyPosition.store';
 

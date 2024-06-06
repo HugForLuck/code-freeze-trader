@@ -1,6 +1,8 @@
 import { ICopyPosition } from './copyPosition.interface';
 import { Injectable } from '@nestjs/common';
 import { COPYPOSITION_STATE } from './copyPositionState.enum';
+import { SYMBOL } from 'src/exchanges/api/symbol.enum';
+import { DIR } from 'src/shared/enums/dir.enum';
 
 /**
  *
@@ -45,50 +47,56 @@ export class CopyPositionStore {
     console.log(this.positions);
   }
 
-  getPatchedPositions(livePositions: ICopyPosition[]): void {
-    let updated = false;
-    const updatePositions = this._positions
-      .map((storePos) => {
-        // patches pos
-        const patch = livePositions.find(
-          (patchPos) =>
-            patchPos.symbol === storePos.symbol &&
-            patchPos.dir === storePos.dir &&
-            patchPos.liveQty !== storePos.liveQty,
-        );
-        if (patch) {
-          updated = true;
-          return { ...storePos, ...patch };
-        }
-        return null;
-      })
-      .filter((p) => {
-        // removes old pos
-        if (p?.symbol !== undefined) {
-          updated = true;
-          return true;
-        }
-        return false;
-      })
-      .concat(
-        // adds new pos
-        livePositions.filter((livePos) => {
-          const isNew = !this._positions.some(
-            (storePos) =>
-              livePos.symbol === storePos.symbol &&
-              livePos.dir === storePos.dir,
-          );
-          if (isNew) {
-            updated = true;
-            return true;
-          }
-          return false;
-        }),
-      ) as ICopyPosition[];
+  patchPositions(livePositions: ICopyPosition[]): boolean {
+    let isUpdated = false;
+    let patchedArray: CopyPositionItem[] = [];
 
-    if (updated) {
-      this._positions = updatePositions;
-      console.log('🟢 Position got updated', this._positions);
+    // Helper function to create composite key
+    const createKey = (pos: CopyPositionItem) => `${pos.symbol}-${pos.dir}`;
+
+    // Create a map for quick lookup by composite key
+    const originMap = new Map<string, CopyPositionItem>();
+    this.positions.forEach((item) => originMap.set(createKey(item), item));
+
+    // Process updates
+    livePositions.forEach((update) => {
+      const key = createKey(update);
+      if (originMap.has(key)) {
+        // Update the existing item
+        const originalItem = originMap.get(key)!;
+        if (JSON.stringify(originalItem) !== JSON.stringify(update)) {
+          Object.assign(originalItem, update);
+          isUpdated = true;
+        }
+      } else {
+        // Add new item
+        this.positions.push(update);
+        isUpdated = true;
+      }
+    });
+
+    // Remove old items
+    const updateKeys = new Set(livePositions.map((pos) => createKey(pos)));
+    patchedArray = this._positions.filter((pos) => {
+      if (updateKeys.has(createKey(pos))) {
+        return true;
+      } else {
+        isUpdated = true;
+        return false;
+      }
+    });
+
+    if (isUpdated) {
+      this.positions = patchedArray;
+      console.log('🟢 CopyPositions got updated', this.positions);
     }
+
+    return isUpdated;
   }
 }
+
+type CopyPositionItem = {
+  symbol: SYMBOL; // Unique symbol
+  dir: DIR; // Unique direction
+  [key: string]: any; // Other properties can vary
+};

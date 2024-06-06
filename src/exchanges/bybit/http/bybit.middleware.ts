@@ -4,11 +4,11 @@ import { BybitService } from 'src/exchanges/bybit/http/bybit.service';
 import { SIDE } from '../../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
 import { IPositionInfo } from './responses/positionInfoResponse.interface';
-import { CopyPosition } from 'src/copy/copyPosition.entity';
 import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
 import { isSIDE } from '../utils/isSide.utils';
 import isNumber from 'src/shared/utils/isNumber.utils';
-import { from, map, switchMap, timer } from 'rxjs';
+import { map } from 'rxjs';
+import { mapToCopyPositions } from './utils/mapToCopyPosition.utils';
 
 /**
  *
@@ -34,21 +34,7 @@ export class BybitMiddleware {
   }
 
   getUserLivePositions$() {
-    return timer(0, 1000).pipe(
-      switchMap(() =>
-        from(this.bybit.getUserLivePositions()).pipe(
-          map((bybitPos) => bybitPos.map((p) => this.mapToCopyPosition(p))),
-        ),
-      ),
-    );
-  }
-
-  mapToCopyPosition(position: IPositionInfo): CopyPosition {
-    const p = new CopyPosition();
-    p.symbol = position.symbol;
-    p.dir = position.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;
-    p.liveQty = +position.size;
-    return p;
+    return this.bybit.getUserLivePositions$().pipe(map(mapToCopyPositions));
   }
 
   private isValid(position: IPositionInfo): boolean {
