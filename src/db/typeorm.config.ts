@@ -5,8 +5,17 @@ import { Copy } from 'src/copy/copy.entity';
 import { AllowedSymbol } from 'src/copy/copySymbols/copySymbol.entity';
 import { Strategy } from 'src/copy/strategy/strategy.entity';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
+import { OriginPosition } from 'src/copy/origniPosition.ts/originPosition.entity';
+import { Trader } from 'src/copy/trader/trader.entity';
 
-export const entities = [Copy, TargetPosition, Strategy, AllowedSymbol];
+export const entities = [
+  Copy,
+  TargetPosition,
+  OriginPosition,
+  Trader,
+  Strategy,
+  AllowedSymbol,
+];
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {

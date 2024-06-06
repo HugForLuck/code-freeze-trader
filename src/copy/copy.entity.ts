@@ -10,6 +10,7 @@ import {
 import { TARGET_EXCHAGE } from './targetExchange.enum';
 import { TargetPosition } from './targetPositions/targetPosition.entity';
 import { Strategy } from './strategy/strategy.entity';
+import { OriginPosition } from './origniPosition.ts/originPosition.entity';
 
 @Entity()
 export class Copy {
@@ -29,6 +30,13 @@ export class Copy {
     { name: 'targetExchange', referencedColumnName: 'targetExchange' },
   ])
   targetPosition: TargetPosition;
+
+  @OneToOne(() => OriginPosition)
+  @JoinColumn([
+    { name: 'symbol', referencedColumnName: 'symbol' },
+    { name: 'dir', referencedColumnName: 'dir' },
+  ])
+  originPosition: OriginPosition;
 
   @ManyToOne(() => Strategy, { eager: true })
   @JoinColumn({ name: 'strategyId' })

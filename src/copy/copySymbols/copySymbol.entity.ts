@@ -7,6 +7,6 @@ export class AllowedSymbol {
   @PrimaryColumn()
   symbol: SYMBOL;
 
-  @ManyToMany(() => Strategy, (strategy) => strategy.symbols)
+  @ManyToMany(() => Strategy, (strategy) => strategy.allowedSymbols)
   strategies: Strategy[];
 }

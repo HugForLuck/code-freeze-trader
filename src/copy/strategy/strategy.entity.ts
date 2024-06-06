@@ -2,6 +2,7 @@ import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 import { AllowedSymbol } from 'src/copy/copySymbols/copySymbol.entity';
 import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.utils';
 import { STRATEGY } from './strategy.enum';
+
 /**
  *
  * Stores different types of strategies, e.g. 1 symbol at a time,
@@ -31,8 +32,18 @@ export class Strategy {
     eager: true,
     cascade: true,
   })
-  @JoinTable({ name: 'symbols2strategies' })
-  symbols: AllowedSymbol[];
+  @JoinTable({
+    name: 'symbols2strategies',
+    joinColumn: {
+      name: 'strategy_id', // Custom name for strategy foreign key
+      referencedColumnName: 'strategyId', // Referencing column in Strategy
+    },
+    inverseJoinColumn: {
+      name: 'allowed_symbol', // Custom name for allowed symbol foreign key
+      referencedColumnName: 'symbol', // Referencing column in AllowedSymbol
+    },
+  })
+  allowedSymbols: AllowedSymbol[];
 
   @Column({ default: false })
   isActive: boolean;
