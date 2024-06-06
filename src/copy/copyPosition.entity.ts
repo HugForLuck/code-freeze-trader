@@ -3,7 +3,7 @@ import { DIR } from 'src/shared/enums/dir.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity({ name: 'copy_positions' })
-export class CopyPosition {
+export class ECopyPosition {
   @PrimaryColumn()
   symbol: SYMBOL;
 

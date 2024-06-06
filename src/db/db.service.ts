@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CopyPosition } from 'src/copy/copyPosition.entity';
+import { ECopyPosition } from 'src/copy/copyPosition.entity';
+import { EStrategy } from 'src/strategy/strategy.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class DBService {
   constructor(
-    @InjectRepository(CopyPosition)
-    private readonly dbPosition: Repository<CopyPosition>,
+    @InjectRepository(ECopyPosition)
+    private readonly dbPosition: Repository<ECopyPosition>,
+    @InjectRepository(EStrategy)
+    private readonly dbStrategies: Repository<EStrategy>,
   ) {}
 
   // async getAllTraders(canBeCopied = true): Promise<Trader[]> {
@@ -44,21 +47,19 @@ export class DBService {
    * @returns strategy
    *
    */
-  // private async getDBStrategy(position: CopyPosition) {
-  //   if (!position?.trader?.traderId || !position.symbol)
-  //     throw new AppError('Trader is not defined', position);
-  //   try {
-  //     return await this.dbStrategies.findOne({
-  //       where: {
-  //         traderId: position.trader.traderId,
-  //         symbol: position.symbol,
-  //       },
-  //       select: ['traderMaxOrders', 'maxPriceChange'],
-  //     });
-  //   } catch (e: any) {
-  //     throw new AppError(e.message, position);
-  //   }
-  // }
+  async getActiveStrategy() {
+    // if (!position?.trader?.traderId || !position.symbol)
+    //   throw new AppError('Trader is not defined', position);
+    try {
+      return await this.dbStrategies.findOne({
+        where: {
+          isActive: true,
+        },
+      });
+    } catch (e: any) {
+      console.log('getDBStrategy', e);
+    }
+  }
 
   /**
    *

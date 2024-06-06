@@ -1,7 +1,7 @@
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CONFIG } from 'src/app/app.config';
-import { CopyPosition } from 'src/copy/copyPosition.entity';
+import { entities } from './db.module';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -14,7 +14,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       username: DB.USERNAME,
       password: DB.PASSWORD,
       database: DB.DATABASE,
-      entities: [CopyPosition],
+      entities,
       synchronize: true,
     };
   }
