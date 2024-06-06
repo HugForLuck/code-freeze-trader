@@ -1,5 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
-import { ESymbol } from 'src/symbol/symbol.entity';
+import { CopySymbol } from 'src/copy/copySymbols/copySymbol.entity';
 import { STRATEGY } from './strategy.enum';
 import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.utils';
 /**
@@ -9,7 +9,7 @@ import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.
  *
  */
 @Entity({ name: 'strategies' })
-export class EStrategy {
+export class Strategy {
   @PrimaryColumn()
   id: STRATEGY;
 
@@ -27,12 +27,12 @@ export class EStrategy {
   @Column({ default: 1 })
   maxSymbols: number;
 
-  @ManyToMany(() => ESymbol, (symbol) => symbol.strategies, {
+  @ManyToMany(() => CopySymbol, (symbol) => symbol.strategies, {
     eager: true,
     cascade: true,
   })
   @JoinTable({ name: 'symbols2strategies' })
-  symbols: ESymbol[];
+  symbols: CopySymbol[];
 
   @Column({ default: false })
   isActive: boolean;

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ICopyPosition } from 'src/copy/copyPosition.interface';
 import { BybitService } from 'src/exchanges/bybit/http/bybit.service';
 import { SIDE } from '../../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
@@ -9,21 +8,22 @@ import { isSIDE } from '../utils/isSide.utils';
 import isNumber from 'src/shared/utils/isNumber.utils';
 import { map } from 'rxjs';
 import { mapToCopyPositions } from './utils/mapToCopyPosition.utils';
+import { ITargetPosition } from 'src/copy/targetPositions/targetPosition.interface';
 
 /**
  *
- * Bybit middleware is used to map bybit objects to code freeze unified types
+ * Bybit middleware which transforms bybit data to code freeze data and vice verse
  *
  */
 @Injectable()
 export class BybitMiddleware {
   constructor(private readonly bybit: BybitService) {}
 
-  async getUserLivePositions(): Promise<ICopyPosition[]> {
+  async getUserLivePositions(): Promise<ITargetPosition[]> {
     const bybitPositions = await this.bybit.getUserLivePositions();
-    const copyPositions: ICopyPosition[] = [];
+    const copyPositions: ITargetPosition[] = [];
     for (const p of bybitPositions) {
-      const copyPosition: ICopyPosition = {
+      const copyPosition: ITargetPosition = {
         symbol: p.symbol,
         dir: p.side == SIDE.BUY ? DIR.LONG : DIR.SHORT,
         liveQty: +p.size,

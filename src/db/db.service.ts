@@ -1,17 +1,29 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ECopyPosition } from 'src/copy/copyPosition.entity';
-import { EStrategy } from 'src/strategy/strategy.entity';
+import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
+import { Strategy } from 'src/copy/strategy/strategy.entity';
 import { Repository } from 'typeorm';
+import { Copy } from 'src/copy/copy.entity';
+import { copyFindAllOptions } from './db.config';
 
 @Injectable()
 export class DBService {
   constructor(
-    @InjectRepository(ECopyPosition)
-    private readonly dbPosition: Repository<ECopyPosition>,
-    @InjectRepository(EStrategy)
-    private readonly dbStrategies: Repository<EStrategy>,
+    @InjectRepository(Copy)
+    private readonly dbCopy: Repository<Copy>,
+    @InjectRepository(TargetPosition)
+    private readonly dbPosition: Repository<TargetPosition>,
+    @InjectRepository(Strategy)
+    private readonly dbStrategies: Repository<Strategy>,
   ) {}
+
+  async getCopies() {
+    return await this.dbCopy.find(copyFindAllOptions);
+  }
+
+  async getTargetPositions() {
+    return await this.dbPosition.find();
+  }
 
   // async getAllTraders(canBeCopied = true): Promise<Trader[]> {
   //   const options: FindManyOptions<Trader> = {

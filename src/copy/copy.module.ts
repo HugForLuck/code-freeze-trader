@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { CopyPositionService } from './copyPosition.service';
+import { CopyService } from './copy.service';
 import { BybitModule } from 'src/exchanges/bybit/bybit.module';
-import { CopyPositionStore } from './copyPosition.store';
+import { CopyStore } from './copy.store';
 import { DBModule } from 'src/db/db.module';
 
 @Module({
   imports: [BybitModule, DBModule],
-  providers: [CopyPositionService, CopyPositionStore],
-  exports: [CopyPositionService],
+  providers: [CopyService, CopyStore],
+  exports: [CopyService],
 })
 export class CopyModule {}
