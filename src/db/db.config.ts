@@ -10,8 +10,19 @@ export const copyFindAllOptions: FindManyOptions<Copy> = {
       maxAvailableBalance: true,
       initialPrice: true,
     },
+    originPosition: {
+      originExchange: true,
+    },
+    strategy: {
+      maxOrdersPerSymbol: true,
+      maxPriceChange: true,
+      maxSymbols: true,
+      allowedSymbols: true,
+    },
   },
   relations: {
     targetPosition: true,
+    originPosition: true,
+    strategy: true,
   },
 };
