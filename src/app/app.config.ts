@@ -1,3 +1,4 @@
+import { getBitgetHttpUrl } from 'src/exchanges/bitget/http/utils/getBitgetHttpUrl.utils';
 import { getBybitHttpUrl } from 'src/exchanges/bybit/http/utils/getHttpUrl.utils';
 
 export enum APP {
@@ -10,6 +11,12 @@ export const CONFIG = () => ({
     SECRET: process.env.BYBIT_SECRET || '',
     IS_LIVE: process.env.BYBIT_IS_LIVE || false,
     HTTP_URL: getBybitHttpUrl(process.env.BYBIT_IS_LIVE),
+  },
+  BITGET: {
+    KEY: process.env.BITGET_KEY || '',
+    SECRET: process.env.BITGET_SECRET || '',
+    PASS: process.env.BITGET_PASS || '',
+    HTTP_URL: getBitgetHttpUrl(),
   },
   DB: {
     HOST: process.env.DB_HOST || 'localhost',

@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CopyStore as CopyStore } from './copy.store';
+import { CopyStore } from './copy.store';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
-import { BybitMiddleware } from 'src/exchanges/bybit/http/bybitMiddleware.service';
+import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
+import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
+import { Trader } from './trader/trader.entity';
 
 /**
  *
@@ -16,6 +18,7 @@ import { BybitMiddleware } from 'src/exchanges/bybit/http/bybitMiddleware.servic
 export class CopyService {
   constructor(
     private readonly bybit: BybitMiddleware,
+    private readonly bitget: BitgetMiddleware,
     private readonly db: DBService,
     private readonly store: CopyStore,
   ) {}
@@ -27,5 +30,10 @@ export class CopyService {
     const targetPositions = await this.bybit.getTargetPositions();
     const isUpdated = this.store.patchTargetPositions(targetPositions);
     if (isUpdated) this.db.saveCopies(this.store.copies);
+
+    const trader = new Trader();
+    trader.name = 'Amazing_';
+    trader.traderId = 'b9b34f738fb03d50a297';
+    const originPositions = await this.bitget.getTraderLivePositions(trader);
   }
 }

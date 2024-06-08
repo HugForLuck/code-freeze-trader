@@ -1,6 +1,6 @@
-import { TObject } from 'src/shared/types/object.type';
+import { HttpRequest } from '../requests/httpRequest';
 
-export function getQuery(params: TObject) {
+export function getQuery({ params }: HttpRequest) {
   const queryParams = new URLSearchParams(params);
   queryParams.sort();
   return queryParams.toString();

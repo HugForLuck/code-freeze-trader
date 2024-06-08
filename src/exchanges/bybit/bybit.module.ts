@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { NTPService } from '../api/ntp.service';
-import { BybitMiddleware } from './http/bybitMiddleware.service';
+import { BybitMiddleware } from './http/bybit.service';
 
 @Module({
   imports: [HttpModule],

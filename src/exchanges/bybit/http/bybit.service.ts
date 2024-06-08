@@ -5,8 +5,6 @@ import { IPositionInfo } from './responses/positionInfoResponse.interface';
 import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
 import { isSIDE } from '../utils/isSide.utils';
 import isNumber from 'src/shared/utils/isNumber.utils';
-import { map } from 'rxjs';
-import { mapToTargetPositions } from './utils/mapToCopyPosition.utils';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
 import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
 import { BybitApiService } from './bybitApi.service';
@@ -29,10 +27,6 @@ export class BybitMiddleware extends BybitApiService {
       if (+p.size > 0) targetPositions.push(targetPosition);
     }
     return targetPositions;
-  }
-
-  getUserLivePositions$() {
-    return this.getAPIUserLivePositions$().pipe(map(mapToTargetPositions));
   }
 
   private isValid(position: IPositionInfo): boolean {
