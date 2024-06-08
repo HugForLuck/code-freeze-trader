@@ -31,9 +31,9 @@ export class CopyService {
     await this.store.syncPositionsFromTarget();
     await this.store.syncPositionsFromOrigin();
 
-    this.bybitWS.subscribeToTicker().subscribe({
+    this.bybitWS.getMarkPrice$().subscribe({
       next: (ticker) => {
-        console.log('MarkPrice', ticker.markPrice);
+        console.log('MarkPrice', ticker.markPrice, ticker.lastPrice);
         // Process the ticker data
       },
       error: (error) => {

@@ -1,38 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
-import { filter, map, switchMap, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { timer } from 'rxjs';
 
-interface BybitTicker {
+interface BybitRequest {
   topic: string;
   type: string;
   data: {
     symbol: string;
     markPrice: string;
+    lastPrice: string;
     // ... other ticker data fields ...
   };
-}
-
-interface BybitRequest {
-  op: 'subscribe' | 'unsubscribe';
+  op: 'subscribe' | 'unsubscribe' | 'ping' | 'pong';
   args?: string[];
-}
-
-interface BybitPing {
-  op: 'ping';
 }
 
 @Injectable()
 export class BybitTickerService {
-  private socket$: WebSocketSubject<BybitRequest | BybitTicker | BybitPing>;
+  private socket$: WebSocketSubject<BybitRequest>;
 
   constructor() {
-    this.socket$ = webSocket<BybitRequest | BybitTicker>(
+    this.socket$ = webSocket<BybitRequest>(
       'wss://stream.bybit.com/v5/public/linear',
     );
   }
 
-  subscribeToTicker(symbol: string = 'BTCUSDT') {
+  getMarkPrice$(symbol: string = 'BTCUSDT') {
     this.socket$.next({
       op: 'subscribe',
       args: [`tickers.${symbol}`],
@@ -41,19 +35,27 @@ export class BybitTickerService {
     const ping$ = timer(0, 20000).pipe(
       // Ping every 20 seconds
       tap(() => {
-        this.socket$.next({ op: 'ping' } as BybitPing);
+        this.socket$.next({ op: 'ping' } as BybitRequest);
       }),
     );
 
     return ping$.pipe(
-      switchMap(() =>
+      mergeMap(() =>
         this.socket$.pipe(
+          tap((message) => {
+            if ('op' in message && message.op === 'pong') {
+              // Type guard for pong messages
+              console.log('Received pong');
+              // (Optional) You can add logic here to track pong responses and handle timeouts if needed.
+            }
+          }),
           filter(
-            (message): message is BybitTicker =>
+            (message): message is BybitRequest =>
               'topic' in message &&
               message.topic === `tickers.${symbol}` &&
               (message.type === 'snapshot' || message.type === 'delta') &&
-              message.data.markPrice != null,
+              (message.data.markPrice != null ||
+                message.data.lastPrice != null),
           ), // Accept both snapshot and delta
           map((message) => message.data),
         ),
