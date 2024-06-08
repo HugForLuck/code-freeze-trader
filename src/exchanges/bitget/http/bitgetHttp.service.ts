@@ -17,10 +17,7 @@ export abstract class BitgetHttpService {
   ) {}
 
   protected async get<T>(request: HttpRequest): Promise<BitgetResponse<T>> {
-    const start = Date.now();
     const timestamp = await this.ntp.getTime();
-    const duration = Date.now() - start;
-    console.log('NPT duration ', duration);
     const query = getQuery(request);
     const body = null;
     const config = getHttpConfig(timestamp, METHOD.GET, request, query, body);

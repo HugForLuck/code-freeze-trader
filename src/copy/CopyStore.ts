@@ -7,14 +7,15 @@ import { AllowedSymbols } from './copy.config';
 import { DBService } from 'src/db/db.service';
 import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
-import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
 import { getLiveCopies, getOpenCopies } from './utils/copyFilter.utls';
+import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
 
 /**
  *
  * Stores all copyPosition related data
  *
  */
+
 @Injectable()
 export class CopyStore {
   constructor(
@@ -65,6 +66,8 @@ export class CopyStore {
     this.state = STORE_STATE.LOADEDED_TARGETS_FROM_DB;
   }
 
+  syncLivePrice() {}
+
   async syncPositionsFromTarget() {
     const targetPositions = await this.bybit.getTargetPositions();
     const isUpdated = this.patchTargetPositions(targetPositions);
@@ -101,32 +104,37 @@ export class CopyStore {
   }
 
   async syncPositionsFromOrigin() {
-    await this.syncLivePositionsFromOrigin();
-    await this.syncOpenPositionsFromOrigin();
+    // await this.syncLivePositionsFromOrigin();
+    // await this.syncOpenPositionsFromOrigin();
   }
 
   private async syncLivePositionsFromOrigin() {
     const liveCopies = getLiveCopies(this.copies);
-    this.copies;
     for (const copy of liveCopies) {
-      console.log('syncing live position', copy);
+      if (copy?.targetPosition?.liveQty ?? 0 > 0) {
+        console.log('syncing live position', copy);
+      }
     }
   }
 
   private async syncOpenPositionsFromOrigin() {
+    // TODO checking, refactoring!!!
     const openCopies = getOpenCopies(this.copies);
-    const uniqueSymbols = getUniqueSymbols(openCopies);
     const traders = await this.db.getTraders();
+    const symbols = getUniqueSymbols(openCopies);
 
-    for (const symbol of uniqueSymbols) {
-      for (const trader of traders) {
-        const data = await Promise.all([
-          this.bitget.getTraderLivePositions(trader, symbol),
-          this.bybit.getLivePrice(symbol),
-        ]);
+    for (const trader of traders) {
+      const pos = await this.bitget.getTraderLivePositions(trader);
+      const filteredPos = pos.filter((p) => p.traderLiveOrders ?? 0 > 0);
+      console.log('trader pos', filteredPos);
+    }
 
-        console.log(data);
-      }
+    for (const symbol of symbols) {
+      const symbolPrice = {
+        symbol,
+        livePrice: await this.bybit.getLivePrice(symbol),
+      };
+      console.log('symbolPrice', symbolPrice);
     }
   }
 

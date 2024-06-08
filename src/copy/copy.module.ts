@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CopyService } from './copy.service';
-import { CopyStore } from './copy.store';
+import { CopyStore } from './CopyStore';
 import { DBModule } from 'src/db/db.module';
 import { ExchangeModule } from 'src/exchanges/sourceExchange.module';
 

@@ -1,5 +1,5 @@
 export enum DIR {
-  LONG = 'LONG',
-  SHORT = 'SHORT',
-  NONE = 'NONE',
+  LONG = 'long',
+  SHORT = 'short',
+  NONE = 'none',
 }

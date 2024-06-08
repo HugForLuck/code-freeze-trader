@@ -21,7 +21,6 @@ export class AppService {
   //       // await this.copy.copy();
   //       // RUNNING CODE FREEZE LOGIC
   //     } catch (error: any) {
-  //       console.log(error);
   //       // HANDLE CODE FREEZE ERRORS
   //       canRun = false;
   //       isDelay = true;

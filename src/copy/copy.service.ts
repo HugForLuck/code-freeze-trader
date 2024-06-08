@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CopyStore } from './copy.store';
+import { CopyStore } from './CopyStore';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
 import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
-import { Trader } from './trader/trader.entity';
+import { BybitTickerService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
 
 /**
  *
@@ -18,6 +18,7 @@ import { Trader } from './trader/trader.entity';
 export class CopyService {
   constructor(
     private readonly bybit: BybitMiddleware,
+    private readonly bybitWS: BybitTickerService,
     private readonly bitget: BitgetMiddleware,
     private readonly db: DBService,
     private readonly store: CopyStore,
@@ -25,15 +26,29 @@ export class CopyService {
 
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
-    this.store.initializeCopiesFromDB(await this.db.getCopies());
+    await this.store.syncCopiesFromDB();
+    this.store.syncLivePrice();
+    await this.store.syncPositionsFromTarget();
+    await this.store.syncPositionsFromOrigin();
 
-    const targetPositions = await this.bybit.getTargetPositions();
-    const isUpdated = this.store.patchTargetPositions(targetPositions);
-    if (isUpdated) this.db.saveCopies(this.store.copies);
+    this.bybitWS.subscribeToTicker().subscribe({
+      next: (ticker) => {
+        console.log('MarkPrice', ticker.markPrice);
+        // Process the ticker data
+      },
+      error: (error) => {
+        console.log('ERROR', error);
+        // Handle errors
+      },
+    });
 
-    const trader = new Trader();
-    trader.name = 'Amazing_';
-    trader.traderId = 'b9b34f738fb03d50a297';
-    const originPositions = await this.bitget.getTraderLivePositions(trader);
+    // const trader = new Trader();
+    // trader.name = 'Amazing_';
+    // trader.traderId = 'b9b34f738fb03d50a297';
+    // const traders = await this.db.getTraders();
+    // console.log(traders);
+    // const originPositions = await this.bitget.getTraderLivePositions(trader);
   }
+
+  applyTargetPositions() {}
 }

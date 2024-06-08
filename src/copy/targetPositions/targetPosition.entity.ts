@@ -78,8 +78,4 @@ export class TargetPosition implements ITargetPosition {
   waitsForNewCopy() {
     this.state = TARGET_STATE.WAITING_FOR_NEW_COPY;
   }
-
-  loadedIntoStore() {
-    this.state = TARGET_STATE.LOADED_INTO_STORE;
-  }
 }
