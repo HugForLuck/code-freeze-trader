@@ -3,17 +3,21 @@ import { DIR } from 'src/shared/enums/dir.enum';
 import { IPositionInfo } from '../responses/positionInfoResponse.interface';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
 import { ITargetPosition } from 'src/copy/targetPositions/targetPosition.interface';
+import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
 
-export function mapToCopyPositions(
+export function mapToTargetPositions(
   positions: IPositionInfo[],
 ): ITargetPosition[] {
-  return positions.map(mapToCopyPosition);
+  return positions.map(mapToTargetPosition);
 }
 
-function mapToCopyPosition(position: IPositionInfo): ITargetPosition {
-  const p = new TargetPosition();
-  p.symbol = position.symbol;
-  p.dir = position.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;
-  p.liveQty = +position.size;
-  return p;
+function mapToTargetPosition(position: IPositionInfo): ITargetPosition {
+  const dir = position.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;
+  const liveQty = +position.size;
+  return new TargetPosition(
+    position.symbol,
+    dir,
+    TARGET_EXCHANGE.BYBIT,
+    liveQty,
+  );
 }

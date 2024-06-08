@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import { NTPService } from '../../api/ntp.service';
 import { BybitRequest } from './requests/bybitRequest';
 import { getQuery } from '../../api/utils/getQuery.utils';
@@ -7,9 +6,10 @@ import { Observable, from, lastValueFrom, map, switchMap } from 'rxjs';
 import { getHttpConfig } from './utils/getConfig.utils';
 import { CONFIG } from 'src/app/app.config';
 import { BybitResponse } from './responses/bybitResponse.type';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class BybitClientService {
+export abstract class BybitHttpService {
   recvWindow = '5000';
 
   constructor(
@@ -34,7 +34,6 @@ export class BybitClientService {
         const config = getHttpConfig(timestamp, query, this.recvWindow);
         const url = CONFIG().BYBIT.HTTP_URL + `${request.endPoint}?${query}`;
         return this.http.get(url, config);
-        // return response.data;
       }),
       map((response) => response.data),
     );

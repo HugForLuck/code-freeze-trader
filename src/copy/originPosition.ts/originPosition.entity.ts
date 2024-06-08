@@ -1,10 +1,10 @@
-import { SYMBOL } from 'src/exchanges/api/symbol.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
 import { Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ORIGIN_EXCHANGE } from '../originExchange.enum';
 import { Trader } from '../trader/trader.entity';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
-@Entity()
+@Entity({ name: 'origin_positions' })
 export class OriginPosition {
   @PrimaryColumn()
   symbol: SYMBOL;
@@ -15,8 +15,8 @@ export class OriginPosition {
   @PrimaryColumn()
   originExchange: ORIGIN_EXCHANGE;
 
-  @ManyToOne(() => Trader)
-  trader: Trader;
+  @ManyToOne(() => Trader, { eager: true })
+  trader: Trader | null;
 
-  traderLiveOrders: number;
+  traderLiveOrders: number | null;
 }

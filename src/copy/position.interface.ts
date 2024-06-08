@@ -1,8 +1,8 @@
-import { SYMBOL } from 'src/exchanges/api/symbol.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
 export interface IPosition {
   symbol: SYMBOL;
   dir: DIR;
-  liveQty?: number;
+  liveQty?: number | null;
 }

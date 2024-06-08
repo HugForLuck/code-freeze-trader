@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
+import { BitgetMiddleware } from './http/bitgetMiddleware.service';
 import { HttpModule } from '@nestjs/axios';
 import { NTPService } from '../api/ntp.service';
-import { BybitMiddleware } from './http/bybitMiddleware.service';
 
 @Module({
   imports: [HttpModule],
-  providers: [BybitMiddleware, NTPService],
-  exports: [BybitMiddleware],
+  providers: [BitgetMiddleware, NTPService],
+  exports: [BitgetMiddleware],
 })
-export class BybitModule {}
+export class BitgetModule {}

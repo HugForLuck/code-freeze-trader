@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { BybitService } from 'src/exchanges/bybit/http/bybit.service';
 import { SIDE } from '../../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
 import { IPositionInfo } from './responses/positionInfoResponse.interface';
@@ -7,8 +6,10 @@ import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
 import { isSIDE } from '../utils/isSide.utils';
 import isNumber from 'src/shared/utils/isNumber.utils';
 import { map } from 'rxjs';
-import { mapToCopyPositions } from './utils/mapToCopyPosition.utils';
-import { ITargetPosition } from 'src/copy/targetPositions/targetPosition.interface';
+import { mapToTargetPositions } from './utils/mapToCopyPosition.utils';
+import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
+import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
+import { BybitApiService } from './bybitApi.service';
 
 /**
  *
@@ -16,25 +17,22 @@ import { ITargetPosition } from 'src/copy/targetPositions/targetPosition.interfa
  *
  */
 @Injectable()
-export class BybitMiddleware {
-  constructor(private readonly bybit: BybitService) {}
-
-  async getUserLivePositions(): Promise<ITargetPosition[]> {
-    const bybitPositions = await this.bybit.getUserLivePositions();
-    const copyPositions: ITargetPosition[] = [];
+export class BybitMiddleware extends BybitApiService {
+  async getTargetPositions(): Promise<TargetPosition[]> {
+    const bybitPositions = await this.getAPIUserLivePositions();
+    const targetPositions: TargetPosition[] = [];
     for (const p of bybitPositions) {
-      const copyPosition: ITargetPosition = {
-        symbol: p.symbol,
-        dir: p.side == SIDE.BUY ? DIR.LONG : DIR.SHORT,
-        liveQty: +p.size,
-      };
-      if (+p.size > 0) copyPositions.push(copyPosition);
+      const dir = p.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;
+      const liveQty = +p.size;
+      const target = TARGET_EXCHANGE.BYBIT;
+      const targetPosition = new TargetPosition(p.symbol, dir, target, liveQty);
+      if (+p.size > 0) targetPositions.push(targetPosition);
     }
-    return copyPositions;
+    return targetPositions;
   }
 
   getUserLivePositions$() {
-    return this.bybit.getUserLivePositions$().pipe(map(mapToCopyPositions));
+    return this.getAPIUserLivePositions$().pipe(map(mapToTargetPositions));
   }
 
   private isValid(position: IPositionInfo): boolean {

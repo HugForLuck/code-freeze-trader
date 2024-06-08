@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Copy } from './copy.entity';
+import { STORE_STATE } from './store/storeState.enum';
+import { TargetPosition } from './targetPositions/targetPosition.entity';
+import { TARGET_STATE } from './targetPositions/targetState.enum';
+import { AllowedSymbols } from './copy.config';
 
 /**
  *
@@ -8,97 +12,78 @@ import { Copy } from './copy.entity';
  */
 @Injectable()
 export class CopyStore {
-  private _copies: Copy[] = [];
+  /**
+   *
+   * Fixed strategy data
+   *
+   */
+  allowedSymbols = AllowedSymbols;
+  maxSymbols = 2;
 
+  /**
+   *
+   * Sets status of the store
+   *
+   */
+  private _state = STORE_STATE.NOT_INITIALIZED;
+  get state() {
+    return this._state;
+  }
+  set state(value: STORE_STATE) {
+    this._state = value;
+    console.log(`🟣 STORE | ${this.state}`);
+  }
+
+  /**
+   *
+   * holds actual state data (origin/target positions + strategy)
+   *
+   */
+  private _copies: Copy[] = [];
   get copies() {
     return this._copies;
   }
 
-  set copies(value: Copy[]) {
+  /**
+   *
+   * @param copy[] used to initialize copies
+   *
+   */
+  initializeCopiesFromDB(value: Copy[]) {
+    this.state = STORE_STATE.LOADING_TARGETS_FROM_DB;
     this._copies = value;
+    this.state = STORE_STATE.LOADEDED_TARGETS_FROM_DB;
+  }
+
+  patchTargetPositions(targetPositions: TargetPosition[]) {
+    this.state = STORE_STATE.LOADING_REMOTE_TARGETS;
+    let isUpdated = false;
+
+    // apply targetPos to store copy
+    this.copies.forEach((copy) => {
+      const foundTargetPos = targetPositions.find(copy.isCopy);
+      if (foundTargetPos) {
+        if (copy.targetPosition.initialPrice == 0) {
+          copy.targetPosition.state = TARGET_STATE.NO_QTY_IN_DB;
+          console.log('TargetPosition has 0 liveQty in db!');
+        } else {
+          copy.targetPosition.loadedIntoStore();
+
+          copy.targetPosition = foundTargetPos;
+          isUpdated = true;
+        }
+      } else if (copy.targetPosition.initialPrice ?? 0 > 0) {
+        copy.resetTarget();
+      }
+      copy.targetPosition.waitsForNewCopy();
+    });
+
+    this.logCopies();
+    this.state = STORE_STATE.LOADED_REMOTE_TARGETS;
+    return isUpdated;
+  }
+
+  logCopies() {
+    console.log(this.copies);
   }
 }
-// private _state = COPY_STATE.WAIT_FOR_SYNC;
-// get state() {
-//   return this._state;
-// }
-// set state(value: COPY_STATE) {
-//   console.log(`🟣 Live Position | ${this.state} ➡️ ${value}`);
-//   this._state = value;
-// }
-
-/**
- *
- * contains the actual data
- *
- */
-// private _targetPositions: ITargetPosition[] = [];
-
-//   get positions() {
-//     return this._targetPositions;
-//   }
-
-//   set positions(value: ITargetPosition[]) {
-//     this._targetPositions = value;
-//   }
-
-//   addPositions(pos: ITargetPosition[]) {
-//     console.log(this.positions);
-//     console.log('⬇️');
-//     this._targetPositions.push(...pos);
-//     console.log(this.positions);
-//   }
-
-//   patchPositions(livePositions: ITargetPosition[]): boolean {
-//     let isUpdated = false;
-//     let patchedArray: CopyPositionItem[] = [];
-
-//     // Helper function to create composite key
-//     const createKey = (pos: CopyPositionItem) => `${pos.symbol}-${pos.dir}`;
-
-//     // Create a map for quick lookup by composite key
-//     const originMap = new Map<string, CopyPositionItem>();
-//     this.positions.forEach((item) => originMap.set(createKey(item), item));
-
-//     // Process updates
-//     livePositions.forEach((update) => {
-//       const key = createKey(update);
-//       if (originMap.has(key)) {
-//         // Update the existing item
-//         const originalItem = originMap.get(key)!;
-//         if (JSON.stringify(originalItem) !== JSON.stringify(update)) {
-//           Object.assign(originalItem, update);
-//           isUpdated = true;
-//         }
-//       } else {
-//         // Add new item
-//         this.positions.push(update);
-//         isUpdated = true;
-//       }
-//     });
-
-//     // Remove old items
-//     const updateKeys = new Set(livePositions.map((pos) => createKey(pos)));
-//     patchedArray = this._targetPositions.filter((pos) => {
-//       if (updateKeys.has(createKey(pos))) {
-//         return true;
-//       } else {
-//         isUpdated = true;
-//         return false;
-//       }
-//     });
-
-//     if (isUpdated) {
-//       this.positions = patchedArray;
-//       console.log('🟢 CopyPositions got updated', this.positions);
-//     }
-
-//     return isUpdated;
-//   }
-// }
-
-// type CopyPositionItem = {
-//   symbol: SYMBOL; // Unique symbol
-//   dir: DIR; // Unique direction
-//   [key: string]: any; // Other properties can vary
-// };

@@ -1,5 +1,5 @@
 import { SIDE } from 'src/exchanges/api/side.enum';
-import { SYMBOL } from 'src/exchanges/api/symbol.enum';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
 export interface IPositionInfoResponse {
   list: IPositionInfo[];

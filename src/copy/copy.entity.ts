@@ -1,19 +1,15 @@
-import { SYMBOL } from 'src/exchanges/api/symbol.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
-import {
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToOne,
-  PrimaryColumn,
-} from 'typeorm';
-import { TARGET_EXCHAGE } from './targetExchange.enum';
+import { Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+import { TARGET_EXCHANGE } from './targetExchange.enum';
 import { TargetPosition } from './targetPositions/targetPosition.entity';
-import { Strategy } from './strategy/strategy.entity';
-import { OriginPosition } from './origniPosition.ts/originPosition.entity';
+import { OriginPosition } from './originPosition.ts/originPosition.entity';
+import { ICopy } from './copy.interface';
+import { IPosition } from './position.interface';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
+import { Strategy } from './strategies/strategy.entity';
 
 @Entity()
-export class Copy {
+export class Copy implements ICopy {
   @PrimaryColumn()
   symbol: SYMBOL;
 
@@ -21,7 +17,7 @@ export class Copy {
   dir: DIR;
 
   @PrimaryColumn()
-  targetExchange: TARGET_EXCHAGE;
+  targetExchange: TARGET_EXCHANGE;
 
   @OneToOne(() => TargetPosition)
   @JoinColumn([
@@ -36,9 +32,27 @@ export class Copy {
     { name: 'symbol', referencedColumnName: 'symbol' },
     { name: 'dir', referencedColumnName: 'dir' },
   ])
-  originPosition: OriginPosition;
+  originPosition: OriginPosition | null;
 
-  @ManyToOne(() => Strategy, { eager: true })
-  @JoinColumn({ name: 'strategyId' })
+  @OneToOne(() => Strategy)
+  @JoinColumn([
+    { name: 'symbol', referencedColumnName: 'symbol' },
+    { name: 'traderId', referencedColumnName: 'traderId' },
+  ])
   strategy: Strategy;
+
+  /**
+   *
+   * Helper
+   *
+   */
+  isCopy(pos: IPosition): boolean {
+    return this.symbol == pos.symbol && this.dir == pos.dir;
+  }
+
+  resetTarget() {
+    this.targetPosition.initialPrice = null;
+    this.targetPosition.maxAvailableBalance = null;
+    this.targetPosition.liveQty = null;
+  }
 }

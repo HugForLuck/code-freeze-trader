@@ -1,12 +1,41 @@
-import { SYMBOL } from 'src/exchanges/api/symbol.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { ITargetPosition } from './targetPosition.interface';
 import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.utils';
-import { TARGET_EXCHAGE } from '../targetExchange.enum';
+import { TARGET_EXCHANGE } from '../targetExchange.enum';
+import { TARGET_STATE } from './targetState.enum';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
 @Entity({ name: 'target_positions' })
 export class TargetPosition implements ITargetPosition {
+  /**
+   *
+   * Sets status of the store
+   *
+   */
+  private _state = TARGET_STATE.NO_QTY_IN_DB;
+  get state() {
+    return this._state;
+  }
+  set state(value: TARGET_STATE) {
+    if (value == TARGET_STATE.LOADED_INTO_STORE)
+      console.log('TargetPosition was added to store');
+
+    this._state = value;
+  }
+
+  constructor(
+    symbol: SYMBOL,
+    dir: DIR,
+    targetExchange: TARGET_EXCHANGE,
+    liveQty: number,
+  ) {
+    this.symbol = symbol;
+    this.dir = dir;
+    this.liveQty = liveQty;
+    this.targetExchange = targetExchange;
+  }
+
   @PrimaryColumn()
   symbol: SYMBOL;
 
@@ -14,7 +43,7 @@ export class TargetPosition implements ITargetPosition {
   dir: DIR;
 
   @PrimaryColumn()
-  targetExchange: TARGET_EXCHAGE;
+  targetExchange: TARGET_EXCHANGE;
 
   /**
    *
@@ -26,18 +55,31 @@ export class TargetPosition implements ITargetPosition {
   @Column('decimal', {
     precision: 17,
     scale: 10,
-    default: 0.5,
+    default: null,
     transformer: new ColumnNumericTransformer(),
   })
-  maxAvailableBalance: number;
+  maxAvailableBalance: number | null;
 
   @Column('decimal', {
     precision: 17,
     scale: 10,
-    default: 0.5,
+    default: null,
     transformer: new ColumnNumericTransformer(),
   })
-  initialPrice: number;
+  initialPrice: number | null = null;
 
-  liveQty: number;
+  liveQty: number | null = null;
+
+  /**
+   *
+   * Helper functions
+   *
+   */
+  waitsForNewCopy() {
+    this.state = TARGET_STATE.WAITING_FOR_NEW_COPY;
+  }
+
+  loadedIntoStore() {
+    this.state = TARGET_STATE.LOADED_INTO_STORE;
+  }
 }

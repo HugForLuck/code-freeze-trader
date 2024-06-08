@@ -6,18 +6,16 @@ export const copyFindAllOptions: FindManyOptions<Copy> = {
     symbol: true,
     dir: true,
     targetPosition: {
+      symbol: true,
+      dir: true,
       targetExchange: true,
       maxAvailableBalance: true,
       initialPrice: true,
     },
     originPosition: {
+      symbol: true,
+      dir: true,
       originExchange: true,
-    },
-    strategy: {
-      maxOrdersPerSymbol: true,
-      maxPriceChange: true,
-      maxSymbols: true,
-      allowedSymbols: true,
     },
   },
   relations: {

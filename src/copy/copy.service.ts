@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CopyStore as CopyStore } from './copy.store';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
-import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.middleware';
 import { DBService } from 'src/db/db.service';
+import { BybitMiddleware } from 'src/exchanges/bybit/http/bybitMiddleware.service';
 
 /**
  *
@@ -17,23 +17,15 @@ export class CopyService {
   constructor(
     private readonly bybit: BybitMiddleware,
     private readonly db: DBService,
-    private readonly copyPositionStore: CopyStore,
+    private readonly store: CopyStore,
   ) {}
 
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
-    const copies = await this.db.getCopies();
-    console.log(copies);
+    this.store.initializeCopiesFromDB(await this.db.getCopies());
 
-    // const pos = await this.db.getTargetPositions();
-    // console.log(pos);
-    // console.log('......');
-    // this.copyPositionStore.state = COPY_STATE.SYNCING_LIVE_POSITIONS;
-    // this.bybit
-    //   .getUserLivePositions$()
-    //   .pipe(tap((pos) => this.copyPositionStore.patchPositions(pos)))
-    //   .subscribe();
-    // const strategy = await this.db.getActiveStrategy();
-    // console.log(strategy);
+    const targetPositions = await this.bybit.getTargetPositions();
+    const isUpdated = this.store.patchTargetPositions(targetPositions);
+    if (isUpdated) this.db.saveCopies(this.store.copies);
   }
 }
