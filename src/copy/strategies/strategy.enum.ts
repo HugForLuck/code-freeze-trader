@@ -1,0 +1,3 @@
+export enum STRATEGY {
+  ONE_SYMBOL_LOW_RISK = 'ONE_SYMBOL_LOW_RISK',
+}
