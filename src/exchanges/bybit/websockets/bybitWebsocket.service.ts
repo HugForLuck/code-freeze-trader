@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
-import { map, tap } from 'rxjs/operators';
-import { Observable, timer } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { Observable, of, timer } from 'rxjs';
 import { IBybitRequest } from './request.interface';
 import { filterMarkPrice } from './filterMarkPrice.utils';
 import { unSubscribeTicker } from './unsubscribeTicker';
@@ -24,6 +24,10 @@ export class BybitWSService {
     return this.socket$.pipe(
       filterMarkPrice(),
       map((message) => message.data),
+      catchError((error) => {
+        console.error('GetMarkPrice$ error:', error);
+        return of(undefined); // Replace the error with 0
+      }),
     );
   }
 

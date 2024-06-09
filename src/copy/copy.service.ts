@@ -6,8 +6,7 @@ import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
 import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
 import { CopyStore } from './store/copy.store';
-import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
-import { SYMBOL } from 'src/shared/enums/symbol.enum';
+import { tap } from 'rxjs';
 
 /**
  *
@@ -30,13 +29,7 @@ export class CopyService {
   async init() {
     const dbCopies = await this.db.getCopies();
     this.store.setCopiesFromDB(dbCopies);
-    this.bybitWS.getMarkPrice$().subscribe({
-      next: (ticker) => this.store.setLivePrices$(ticker),
-      error: (error) => {
-        console.log('ERROR', error);
-        // Handle errors
-      },
-    });
+    this.setLivePrices$();
 
     // await this.store.syncPositionsFromTarget();
     // await this.store.syncPositionsFromOrigin();
@@ -47,6 +40,13 @@ export class CopyService {
     // const traders = await this.db.getTraders();
     // console.log(traders);
     // const originPositions = await this.bitget.getTraderLivePositions(trader);
+  }
+
+  private setLivePrices$() {
+    this.bybitWS
+      .getMarkPrice$()
+      .pipe(tap((ticker) => this.store.setLivePrices$(ticker)))
+      .subscribe();
   }
 
   applyTargetPositions() {}

@@ -17,7 +17,7 @@ export const copyActions = {
     type: ACTION.SET_COPIES,
     payload: status,
   }),
-  setMarkPrices: (ticker: ITicker) => ({
+  setMarkPrices: (ticker?: ITicker) => ({
     type: ACTION.SET_MARKPRICES,
     payload: ticker,
   }),
