@@ -44,7 +44,7 @@ export class CopyService {
 
   private setLivePrices$() {
     this.bybitWS
-      .getMarkPrice$()
+      .getLivePrice$()
       .pipe(tap((ticker) => this.store.setLivePrices$(ticker)))
       .subscribe();
   }

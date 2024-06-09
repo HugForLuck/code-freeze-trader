@@ -20,7 +20,7 @@ export class BybitWSService {
     this.ping();
   }
 
-  getMarkPrice$(): Observable<ITicker | undefined> {
+  getLivePrice$(): Observable<ITicker | undefined> {
     return this.socket$.pipe(
       filterMarkPrice(),
       map((message) => message.data),
