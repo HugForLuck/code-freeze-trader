@@ -41,7 +41,7 @@ export class CopyStore {
     // this.select$((state) => state).subscribe(console.log);
     // this.getStatus$().subscribe(console.log);
     // this.getCopies$().subscribe(console.log);
-    this.getPrices$().subscribe(console.log);
+    // this.getPrices$().subscribe(console.log);
   }
 
   private dispatch(action: any) {

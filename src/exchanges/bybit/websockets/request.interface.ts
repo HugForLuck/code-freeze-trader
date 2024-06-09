@@ -5,6 +5,6 @@ export interface IBybitRequest {
   type?: string;
   ret_msg?: string;
   data?: ITicker;
-  op: 'subscribe' | 'unsubscribe' | 'ping' | 'pong';
-  args?: string[];
+  op: 'subscribe' | 'unsubscribe' | 'ping' | 'pong' | 'auth';
+  args?: (string | number)[];
 }
