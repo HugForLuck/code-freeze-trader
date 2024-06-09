@@ -98,7 +98,6 @@ export class CopyStore {
       copy.targetPosition.waitsForNewCopy();
     });
 
-    // this.logCopies();
     this.state = STORE_STATE.LOADED_REMOTE_TARGETS;
     return isUpdated;
   }

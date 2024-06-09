@@ -27,7 +27,6 @@ export class CopyService {
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
     await this.store.syncCopiesFromDB();
-    // this.store.syncLivePrice();
     this.store.syncLivePrices$();
     await this.store.syncPositionsFromTarget();
     await this.store.syncPositionsFromOrigin();

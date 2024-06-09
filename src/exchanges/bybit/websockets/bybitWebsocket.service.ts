@@ -16,11 +16,11 @@ export class BybitWSService {
 
   constructor() {
     this.socket$ = webSocket<IBybitRequest>(this.ws_url);
+    this.subscribeTicker();
     this.ping();
   }
 
   getMarkPrice$(): Observable<ITicker | undefined> {
-    this.subscribeTicker();
     return this.socket$.pipe(
       filterMarkPrice(),
       map((message) => message.data),
