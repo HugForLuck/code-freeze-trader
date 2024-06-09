@@ -68,6 +68,8 @@ export class TargetPosition implements ITargetPosition {
   })
   initialPrice: number | null = null;
 
+  livePrice: number | null = null;
+
   liveQty: number | null = null;
 
   /**

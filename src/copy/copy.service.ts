@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CopyStore } from './CopyStore';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
 import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
-import { BybitTickerService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
+import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
+import { CopyStore } from './copy.store';
 
 /**
  *
@@ -18,7 +18,7 @@ import { BybitTickerService } from 'src/exchanges/bybit/websockets/bybitWebsocke
 export class CopyService {
   constructor(
     private readonly bybit: BybitMiddleware,
-    private readonly bybitWS: BybitTickerService,
+    private readonly bybitWS: BybitWSService,
     private readonly bitget: BitgetMiddleware,
     private readonly db: DBService,
     private readonly store: CopyStore,
@@ -27,20 +27,10 @@ export class CopyService {
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
     await this.store.syncCopiesFromDB();
-    this.store.syncLivePrice();
+    // this.store.syncLivePrice();
+    this.store.syncLivePrices$();
     await this.store.syncPositionsFromTarget();
     await this.store.syncPositionsFromOrigin();
-
-    this.bybitWS.getMarkPrice$().subscribe({
-      next: (ticker) => {
-        console.log('MarkPrice', ticker.markPrice, ticker.lastPrice);
-        // Process the ticker data
-      },
-      error: (error) => {
-        console.log('ERROR', error);
-        // Handle errors
-      },
-    });
 
     // const trader = new Trader();
     // trader.name = 'Amazing_';

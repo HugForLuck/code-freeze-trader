@@ -8,7 +8,6 @@ import isNumber from 'src/shared/utils/isNumber.utils';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
 import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
 import { BybitApiService } from './bybitApi.service';
-import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
 /**
  *
@@ -28,11 +27,6 @@ export class BybitMiddleware extends BybitApiService {
       if (+p.size > 0) targetPositions.push(targetPosition);
     }
     return targetPositions;
-  }
-
-  async getLivePrice(symbol: SYMBOL): Promise<number> {
-    const ticker = await this.getTicker(symbol);
-    return +ticker.markPrice;
   }
 
   private isValid(position: IPositionInfo): boolean {

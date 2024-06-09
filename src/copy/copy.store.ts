@@ -9,6 +9,8 @@ import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
 import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
 import { getLiveCopies, getOpenCopies } from './utils/copyFilter.utls';
+import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
+import { setTargetLivePrice } from './utils/setTargetLivePrice.utils';
 
 /**
  *
@@ -20,6 +22,7 @@ export class CopyStore {
   constructor(
     private readonly db: DBService,
     private readonly bybit: BybitMiddleware,
+    private readonly bybitWS: BybitWSService,
     private readonly bitget: BitgetMiddleware,
   ) {}
   /**
@@ -100,9 +103,19 @@ export class CopyStore {
     return isUpdated;
   }
 
+  syncLivePrices$() {
+    this.bybitWS.getMarkPrice$().subscribe({
+      next: (ticker) => setTargetLivePrice(this.copies, ticker),
+      error: (error) => {
+        console.log('ERROR', error);
+        // Handle errors
+      },
+    });
+  }
+
   async syncPositionsFromOrigin() {
-    await this.syncLivePositionsFromOrigin();
-    await this.syncOpenPositionsFromOrigin();
+    // await this.syncLivePositionsFromOrigin();
+    // await this.syncOpenPositionsFromOrigin();
   }
 
   private async syncLivePositionsFromOrigin() {
@@ -120,12 +133,7 @@ export class CopyStore {
 
     for (const symbol of uniqueSymbols) {
       for (const trader of traders) {
-        const data = await Promise.all([
-          this.bitget.getTraderLivePositions(trader, symbol),
-          this.bybit.getLivePrice(symbol),
-        ]);
-
-        console.log(data);
+        this.bitget.getTraderLivePositions(trader, symbol);
       }
     }
   }
