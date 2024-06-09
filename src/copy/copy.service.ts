@@ -6,8 +6,8 @@ import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
 import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
 import { CopyStore } from './store/copy.store';
-import { STATUS } from './store/status.enum';
-import { Copy } from './copy.entity';
+import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
 /**
  *
@@ -29,11 +29,15 @@ export class CopyService {
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
     const dbCopies = await this.db.getCopies();
-    this.store.getStatus$().subscribe(console.log);
-    // this.store.getCopies$().subscribe(console.log);
     this.store.setCopiesFromDB(dbCopies);
-    // await this.store.syncCopiesFromDB();
-    // this.store.syncLivePrices$();
+    this.bybitWS.getMarkPrice$().subscribe({
+      next: (ticker) => this.store.setLivePrices$(ticker),
+      error: (error) => {
+        console.log('ERROR', error);
+        // Handle errors
+      },
+    });
+
     // await this.store.syncPositionsFromTarget();
     // await this.store.syncPositionsFromOrigin();
 

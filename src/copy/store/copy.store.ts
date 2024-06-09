@@ -19,6 +19,7 @@ import {
 } from 'rxjs';
 import { ICopyState, initialCopyState } from '../copyState';
 import { ACTION, copyActions } from './action.enum';
+import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
 
 /**
  *
@@ -38,7 +39,9 @@ export class CopyStore {
     this.state$ = new BehaviorSubject<ICopyState>(initialCopyState);
 
     // this.select$((state) => state).subscribe(console.log);
-    this.dispatch({ type: 'INCREMENT' });
+    // this.getStatus$().subscribe(console.log);
+    // this.getCopies$().subscribe(console.log);
+    this.getPrices$().subscribe(console.log);
   }
 
   private dispatch(action: any) {
@@ -47,14 +50,15 @@ export class CopyStore {
 
   private reducer(state: ICopyState, action: any): ICopyState {
     switch (action.type) {
-      case 'INCREMENT':
-        return { ...state, count: state.count + 1 };
-      case 'DECREMENT':
-        return { ...state, count: state.count - 1 };
       case ACTION.SET_COPIES:
         return { ...state, copies: action.payload };
       case ACTION.SET_STATUS:
         return { ...state, status: action.payload };
+      case ACTION.SET_MARKPRICES:
+        return {
+          ...state,
+          copies: setTargetLivePrice(state.copies, action.payload),
+        };
       default:
         return state;
     }
@@ -70,6 +74,16 @@ export class CopyStore {
     this.dispatch(copyActions.setStatus(status));
   }
 
+  setLivePrices$(ticker?: ITicker) {
+    if (!ticker) return;
+    this.dispatch(copyActions.setMarkPrices(ticker));
+  }
+
+  /**
+   *
+   * Selectors for all or substates
+   *
+   */
   getStatus$() {
     return this.state$.asObservable().pipe(
       map((state) => state.status),
@@ -88,6 +102,23 @@ export class CopyStore {
   getCopies$() {
     return this.state$.asObservable().pipe(
       map((state) => state.copies),
+      distinctUntilChanged(),
+    );
+  }
+
+  getPrices$() {
+    return this.state$.asObservable().pipe(
+      map((state) => [
+        ...new Map(
+          state.copies.map((copy) => [
+            copy.symbol,
+            {
+              symbol: copy.symbol,
+              livePrice: copy.targetPosition.livePrice,
+            },
+          ]),
+        ).values(),
+      ]),
       distinctUntilChanged(),
     );
   }
@@ -167,16 +198,6 @@ export class CopyStore {
 
     this.state = STATUS.LOADED_REMOTE_TARGETS;
     return isUpdated;
-  }
-
-  syncLivePrices$() {
-    this.bybitWS.getMarkPrice$().subscribe({
-      next: (ticker) => setTargetLivePrice(this.copies, ticker),
-      error: (error) => {
-        console.log('ERROR', error);
-        // Handle errors
-      },
-    });
   }
 
   async syncPositionsFromOrigin() {
