@@ -5,7 +5,9 @@ import { DBService } from 'src/db/db.service';
 import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
 import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
-import { CopyStore } from './copy.store';
+import { CopyStore } from './store/copy.store';
+import { STATUS } from './store/status.enum';
+import { Copy } from './copy.entity';
 
 /**
  *
@@ -26,10 +28,14 @@ export class CopyService {
 
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
-    await this.store.syncCopiesFromDB();
-    this.store.syncLivePrices$();
-    await this.store.syncPositionsFromTarget();
-    await this.store.syncPositionsFromOrigin();
+    const dbCopies = await this.db.getCopies();
+    this.store.getStatus$().subscribe(console.log);
+    // this.store.getCopies$().subscribe(console.log);
+    this.store.setCopiesFromDB(dbCopies);
+    // await this.store.syncCopiesFromDB();
+    // this.store.syncLivePrices$();
+    // await this.store.syncPositionsFromTarget();
+    // await this.store.syncPositionsFromOrigin();
 
     // const trader = new Trader();
     // trader.name = 'Amazing_';

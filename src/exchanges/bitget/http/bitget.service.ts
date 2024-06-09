@@ -5,7 +5,7 @@ import { Trader } from 'src/copy/trader/trader.entity';
 import { AllowedSymbols } from 'src/copy/copy.config';
 import { OriginPosition } from 'src/copy/originPosition.ts/originPosition.entity';
 import { SYMBOL } from 'src/shared/enums/symbol.enum';
-import { DIRS } from 'src/shared/enums/dirs';
+import { DIRS } from 'src/shared/consts/dirs';
 
 @Injectable()
 export class BitgetMiddleware extends BitgetApiService {

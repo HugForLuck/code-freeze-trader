@@ -1,16 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Copy } from './copy.entity';
-import { STORE_STATE } from './store/storeState.enum';
-import { TargetPosition } from './targetPositions/targetPosition.entity';
-import { TARGET_STATE } from './targetPositions/targetState.enum';
-import { AllowedSymbols } from './copy.config';
+import { Copy } from '../copy.entity';
+import { STATUS } from './status.enum';
+import { TargetPosition } from '../targetPositions/targetPosition.entity';
+import { TARGET_STATE } from '../targetPositions/targetState.enum';
 import { DBService } from 'src/db/db.service';
 import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
 import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
-import { getLiveCopies, getOpenCopies } from './utils/copyFilter.utls';
+import { getLiveCopies, getOpenCopies } from '../utils/copyFilter.utls';
 import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
-import { setTargetLivePrice } from './utils/setTargetLivePrice.utils';
+import { setTargetLivePrice } from '../utils/setTargetLivePrice.utils';
+import {
+  BehaviorSubject,
+  Observable,
+  distinctUntilChanged,
+  map,
+  scan,
+} from 'rxjs';
+import { ICopyState, initialCopyState } from '../copyState';
+import { ACTION, copyActions } from './action.enum';
 
 /**
  *
@@ -19,30 +27,89 @@ import { setTargetLivePrice } from './utils/setTargetLivePrice.utils';
  */
 @Injectable()
 export class CopyStore {
+  private state$: BehaviorSubject<ICopyState>;
+
   constructor(
     private readonly db: DBService,
     private readonly bybit: BybitMiddleware,
     private readonly bybitWS: BybitWSService,
     private readonly bitget: BitgetMiddleware,
-  ) {}
+  ) {
+    this.state$ = new BehaviorSubject<ICopyState>(initialCopyState);
+
+    // this.select$((state) => state).subscribe(console.log);
+    this.dispatch({ type: 'INCREMENT' });
+  }
+
+  private dispatch(action: any) {
+    this.state$.next(this.reducer(this.state$.value, action));
+  }
+
+  private reducer(state: ICopyState, action: any): ICopyState {
+    switch (action.type) {
+      case 'INCREMENT':
+        return { ...state, count: state.count + 1 };
+      case 'DECREMENT':
+        return { ...state, count: state.count - 1 };
+      case ACTION.SET_COPIES:
+        return { ...state, copies: action.payload };
+      case ACTION.SET_STATUS:
+        return { ...state, status: action.payload };
+      default:
+        return state;
+    }
+  }
+
+  setCopiesFromDB(copies: Copy[]) {
+    this.setStatus(STATUS.LOADING_COPIES_FROM_DB);
+    this.dispatch(copyActions.setCopies(copies));
+    this.setStatus(STATUS.LOADED_COPIES_FROM_DB);
+  }
+
+  setStatus(status: STATUS) {
+    this.dispatch(copyActions.setStatus(status));
+  }
+
+  getStatus$() {
+    return this.state$.asObservable().pipe(
+      map((state) => state.status),
+      distinctUntilChanged(),
+    );
+  }
+
+  get$(selector?: (state: ICopyState) => any): Observable<any> {
+    return this.state$.asObservable().pipe(
+      map((state) => state),
+      distinctUntilChanged(),
+      scan((acc, state) => (selector ? selector(state) : state), undefined),
+    );
+  }
+
+  getCopies$() {
+    return this.state$.asObservable().pipe(
+      map((state) => state.copies),
+      distinctUntilChanged(),
+    );
+  }
+
   /**
    *
    * Fixed strategy data
    *
    */
-  allowedSymbols = AllowedSymbols;
-  maxSymbols = 2;
+  // allowedSymbols = AllowedSymbols;
+  // maxSymbols = 2;
 
   /**
    *
    * Sets status of the store
    *
    */
-  private _state = STORE_STATE.NOT_INITIALIZED;
+  private _state = STATUS.NOT_INITIALIZED;
   get state() {
     return this._state;
   }
-  set state(value: STORE_STATE) {
+  set state(value: STATUS) {
     this._state = value;
     console.log(`🟣 STORE | ${this.state}`);
   }
@@ -63,9 +130,9 @@ export class CopyStore {
    *
    */
   async syncCopiesFromDB() {
-    this.state = STORE_STATE.LOADING_TARGETS_FROM_DB;
+    this.state = STATUS.LOADING_TARGETS_FROM_DB;
     this._copies = await this.db.getCopies();
-    this.state = STORE_STATE.LOADEDED_TARGETS_FROM_DB;
+    this.state = STATUS.LOADEDED_TARGETS_FROM_DB;
   }
 
   async syncPositionsFromTarget() {
@@ -75,7 +142,7 @@ export class CopyStore {
   }
 
   private patchTargetPositions(targetPositions: TargetPosition[]) {
-    this.state = STORE_STATE.LOADING_REMOTE_TARGETS;
+    this.state = STATUS.LOADING_REMOTE_TARGETS;
     let isUpdated = false;
 
     // apply targetPos to store copy
@@ -98,7 +165,7 @@ export class CopyStore {
       copy.targetPosition.waitsForNewCopy();
     });
 
-    this.state = STORE_STATE.LOADED_REMOTE_TARGETS;
+    this.state = STATUS.LOADED_REMOTE_TARGETS;
     return isUpdated;
   }
 
