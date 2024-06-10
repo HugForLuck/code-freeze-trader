@@ -23,47 +23,6 @@ export class BybitWSService {
   constructor() {
     this.initPublicSocket();
     this.initPrivateSocket();
-    // this.privateSocket$ = webSocket<IBybitRequest<IBybitPosition[]>>({
-    //   url: this.ws_private_url,
-    //   closeObserver: {
-    //     next: (closeEvent) => {
-    //       console.log('⛔ PrivateWS Closed:', closeEvent);
-    //       this.shouldReconnectPrivate$.next();
-    //     },
-    //   },
-    //   openObserver: {
-    //     next: () => {
-    //       console.log('✅ PrivateWS Opened');
-    //       this.subscribePublic(); // Subscribe after reconnect
-    //     },
-    //   },
-    // });
-    // this.publicSocket$ = webSocket<IBybitRequest<ITicker>>({
-    //   url: this.ws_public_url,
-    //   closeObserver: {
-    //     next: (closeEvent) => {
-    //       console.log('⛔ PublicWS Closed:', closeEvent);
-    //       this.subscribePublic();
-    //     },
-    //   },
-    //   openObserver: {
-    //     next: () => {
-    //       console.log('✅ PublicWS Opened');
-    //       this.subscribePrivate(); // Subscribe after reconnect
-    //     },
-    //   },
-    // });
-
-    // this.shouldReconnectPublic$
-    //   .pipe(
-    //     switchMap(() =>
-    //       timer(1000).pipe(takeUntil(this.shouldReconnectPublic$)),
-    //     ),
-    //     tap(() => this.initPublicSocket()),
-    //   )
-    //   .subscribe();
-    // this.reconnectPublic$().subscribe();
-    // // this.ping$().subscribe();
   }
 
   private initPublicSocket() {
