@@ -2,14 +2,15 @@ import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interfac
 import { Copy } from '../copy.entity';
 
 export function setTargetLivePrice(copies: Copy[], ticker?: ITicker): Copy[] {
-  return ticker
-    ? [
-        ...copies.map((copy) => {
-          if (copy.symbol == ticker?.symbol) {
-            copy.targetPosition.livePrice = +ticker.markPrice;
-          }
-          return copy;
-        }),
-      ]
-    : copies;
+  if (ticker?.markPrice) {
+    return [
+      ...copies.map((copy) => {
+        if (copy.symbol == ticker?.symbol) {
+          copy.targetPosition.livePrice = +ticker.markPrice;
+        }
+        return copy;
+      }),
+    ];
+  }
+  return copies;
 }

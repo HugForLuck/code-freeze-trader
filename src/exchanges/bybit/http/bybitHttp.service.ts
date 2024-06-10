@@ -1,33 +1,26 @@
-import { NTPService } from '../../api/ntp.service';
-import { getQuery } from '../../api/utils/getQuery.utils';
-import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
-import { getHttpConfig } from './utils/getConfig.utils';
-import { CONFIG } from 'src/app/app.config';
-import { BybitResponse } from './responses/bybitResponse.type';
+import { UserLivePositionRequest } from './requests/userLivePositionRequest';
+import { BybitClientService } from './bybitClient.service';
+import {
+  IPositionInfo,
+  IPositionInfoResponse,
+} from './responses/positionInfoResponse.interface';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
+import { TickerRequest } from 'src/exchanges/bitget/http/requests/tickerRequest';
+import { ITickerResponse } from './responses/tickerResponse.interface';
 import { Injectable } from '@nestjs/common';
-import { HttpRequest } from 'src/exchanges/api/requests/httpRequest';
 
 @Injectable()
-export abstract class BybitHttpService {
-  recvWindow = '5000';
+export class BybitHttpService extends BybitClientService {
+  async getUserLivePositions(): Promise<IPositionInfo[]> {
+    const request = new UserLivePositionRequest();
+    const axiosResponse = await this.get<IPositionInfoResponse>(request);
+    //  TODO catch 10002 servertime desynced
+    return axiosResponse.result.list;
+  }
 
-  constructor(
-    private readonly ntp: NTPService,
-    private readonly http: HttpService,
-  ) {}
-
-  protected async get<T>(request: HttpRequest): Promise<BybitResponse<T>> {
-    const timestamp = await this.ntp.getTime();
-    const query = getQuery(request);
-    const config = getHttpConfig(timestamp, query, this.recvWindow);
-    const url = CONFIG().BYBIT.HTTP_URL + `${request.endPoint}?${query}`;
-
-    try {
-      const response = await lastValueFrom(this.http.get(url, config));
-      return response.data;
-    } catch (e: any) {
-      throw Error('Bitget ERROR');
-    }
+  async getTicker(symbol: SYMBOL) {
+    const request = new TickerRequest(symbol);
+    const response = await this.get<ITickerResponse>(request);
+    return response.result.list[0];
   }
 }

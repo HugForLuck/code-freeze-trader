@@ -1,9 +1,10 @@
-import { SYMBOL } from 'src/shared/enums/symbol.enum';
 import { IBybitRequest } from './request.interface';
+import { TICKER_SYMBOLS } from './utils/tickerSymbols';
 
-export function unSubscribePublic(): IBybitRequest {
+export function unsubscribePublic(): IBybitRequest<any> {
   return {
+    req_id: 'ticker',
     op: 'unsubscribe',
-    args: [`tickers.${SYMBOL.BTCUSDT}`, `tickers.${SYMBOL.ETHUSDT}`],
+    args: TICKER_SYMBOLS,
   };
 }

@@ -2,11 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
-import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
-import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
 import { CopyStore } from './store/copy.store';
 import { tap } from 'rxjs';
+import { Bybit } from 'src/exchanges/bybit/bybit.service';
 
 /**
  *
@@ -18,8 +17,7 @@ import { tap } from 'rxjs';
 @Injectable()
 export class CopyService {
   constructor(
-    private readonly bybit: BybitMiddleware,
-    private readonly bybitWS: BybitWSService,
+    private readonly bybit: Bybit,
     private readonly bitget: BitgetMiddleware,
     private readonly db: DBService,
     private readonly store: CopyStore,
@@ -30,6 +28,11 @@ export class CopyService {
     const dbCopies = await this.db.getCopies();
     this.store.setCopiesFromDB(dbCopies);
     this.setLivePrices$();
+    this.bybit.getUserLivePositions$().subscribe({
+      next: (value) => console.log(value),
+      error: (error) => console.log('ERRORED', error),
+      complete: () => console.log('COMPLETED'),
+    });
 
     // await this.store.syncPositionsFromTarget();
     // await this.store.syncPositionsFromOrigin();
@@ -43,7 +46,7 @@ export class CopyService {
   }
 
   private setLivePrices$() {
-    this.bybitWS
+    this.bybit
       .getLivePrice$()
       .pipe(tap((ticker) => this.store.setLivePrices$(ticker)))
       .subscribe();

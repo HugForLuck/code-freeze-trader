@@ -1,10 +1,9 @@
-import { ITicker } from './response/ticker.interface';
-
-export interface IBybitRequest {
+export interface IBybitRequest<T> {
   topic?: string;
   type?: string;
+  req_id?: string;
   ret_msg?: string;
-  data?: ITicker;
+  data?: T;
   op: 'subscribe' | 'unsubscribe' | 'ping' | 'pong' | 'auth';
   args?: (string | number)[];
 }

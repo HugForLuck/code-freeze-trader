@@ -4,11 +4,9 @@ import { STATUS } from './status.enum';
 import { TargetPosition } from '../targetPositions/targetPosition.entity';
 import { TARGET_STATE } from '../targetPositions/targetState.enum';
 import { DBService } from 'src/db/db.service';
-import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
 import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
 import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
 import { getLiveCopies, getOpenCopies } from '../utils/copyFilter.utls';
-import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
 import { setTargetLivePrice } from '../utils/setTargetLivePrice.utils';
 import {
   BehaviorSubject,
@@ -20,6 +18,7 @@ import {
 import { ICopyState, initialCopyState } from '../copyState';
 import { ACTION, copyActions } from './action.enum';
 import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
+import { IBybitPosition } from 'src/exchanges/bybit/websockets/response/position.interface';
 
 /**
  *
@@ -32,8 +31,6 @@ export class CopyStore {
 
   constructor(
     private readonly db: DBService,
-    private readonly bybit: BybitMiddleware,
-    private readonly bybitWS: BybitWSService,
     private readonly bitget: BitgetMiddleware,
   ) {
     this.state$ = new BehaviorSubject<ICopyState>(initialCopyState);
@@ -77,6 +74,10 @@ export class CopyStore {
   setLivePrices$(ticker?: ITicker) {
     if (!ticker) return;
     this.dispatch(copyActions.setMarkPrices(ticker));
+  }
+
+  setPositions$(position: IBybitPosition[]) {
+    console.log(position);
   }
 
   /**
@@ -166,11 +167,11 @@ export class CopyStore {
     this.state = STATUS.LOADEDED_TARGETS_FROM_DB;
   }
 
-  async syncPositionsFromTarget() {
-    const targetPositions = await this.bybit.getTargetPositions();
-    const isUpdated = this.patchTargetPositions(targetPositions);
-    if (isUpdated) this.db.saveCopies(this.copies);
-  }
+  // async syncPositionsFromTarget() {
+  //   const targetPositions = await this.bybit.getTargetPositions();
+  //   const isUpdated = this.patchTargetPositions(targetPositions);
+  //   if (isUpdated) this.db.saveCopies(this.copies);
+  // }
 
   private patchTargetPositions(targetPositions: TargetPosition[]) {
     this.state = STATUS.LOADING_REMOTE_TARGETS;

@@ -1,0 +1,36 @@
+export interface IBybitPosition {
+  positionIdx: number;
+  tradeMode: number;
+  riskId: number;
+  riskLimitValue: string;
+  symbol: string;
+  side: string;
+  size: string;
+  entryPrice: string;
+  leverage: string;
+  positionValue: string;
+  positionBalance: string;
+  markPrice: string;
+  positionIM: string;
+  positionMM: string;
+  takeProfit: string;
+  stopLoss: string;
+  trailingStop: string;
+  unrealisedPnl: string;
+  curRealisedPnl: string;
+  cumRealisedPnl: string;
+  sessionAvgPrice: string;
+  createdTime: string;
+  updatedTime: string;
+  tpslMode: string;
+  liqPrice: string;
+  bustPrice: string;
+  category: string;
+  positionStatus: string;
+  adlRankIndicator: number;
+  autoAddMargin: number;
+  leverageSysUpdatedTime: string;
+  mmrSysUpdatedTime: string;
+  seq: number;
+  isReduceOnly: boolean;
+}

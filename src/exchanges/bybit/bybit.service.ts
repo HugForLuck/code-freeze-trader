@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { SIDE } from '../../api/side.enum';
+import { SIDE } from '../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
-import { IPositionInfo } from './responses/positionInfoResponse.interface';
+import { IPositionInfo } from './http/responses/positionInfoResponse.interface';
 import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
-import { isSIDE } from '../utils/isSide.utils';
+import { isSIDE } from './utils/isSide.utils';
 import isNumber from 'src/shared/utils/isNumber.utils';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
 import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
-import { BybitApiService } from './bybitApi.service';
+import { BybitHttpService } from './http/bybitHttp.service';
+import { BybitWSService } from './websockets/bybitWebsocket.service';
+import { filter, retry, tap } from 'rxjs';
 
 /**
  *
@@ -15,9 +17,14 @@ import { BybitApiService } from './bybitApi.service';
  *
  */
 @Injectable()
-export class BybitMiddleware extends BybitApiService {
+export class Bybit {
+  constructor(
+    private readonly http: BybitHttpService,
+    private readonly ws: BybitWSService,
+  ) {}
+
   async getTargetPositions(): Promise<TargetPosition[]> {
-    const bybitPositions = await this.getAPIUserLivePositions();
+    const bybitPositions = await this.http.getUserLivePositions();
     const targetPositions: TargetPosition[] = [];
     for (const p of bybitPositions) {
       const dir = p.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;
@@ -27,6 +34,18 @@ export class BybitMiddleware extends BybitApiService {
       if (+p.size > 0) targetPositions.push(targetPosition);
     }
     return targetPositions;
+  }
+
+  getUserLivePositions$() {
+    return this.ws.getLivePositions$().pipe(
+      filter((pos) => pos !== undefined),
+      retry(),
+      tap(console.log),
+    );
+  }
+
+  getLivePrice$() {
+    return this.ws.getLivePrice$();
   }
 
   private isValid(position: IPositionInfo): boolean {
