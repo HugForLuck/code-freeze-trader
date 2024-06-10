@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
-import { BybitMiddleware } from 'src/exchanges/bybit/http/bybit.service';
-import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
-import { BybitWSService } from 'src/exchanges/bybit/websockets/bybitWebsocket.service';
-import { CopyStore } from './copy.store';
+import { Bitget } from 'src/exchanges/bitget/http/bitget.service';
+import { CopyStore } from './store/copy.store';
+import { tap } from 'rxjs';
+import { Bybit } from 'src/exchanges/bybit/bybit.service';
 
 /**
  *
@@ -17,27 +17,43 @@ import { CopyStore } from './copy.store';
 @Injectable()
 export class CopyService {
   constructor(
-    private readonly bybit: BybitMiddleware,
-    private readonly bybitWS: BybitWSService,
-    private readonly bitget: BitgetMiddleware,
+    private readonly bybit: Bybit,
+    private readonly bitget: Bitget,
     private readonly db: DBService,
     private readonly store: CopyStore,
   ) {}
 
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
-    await this.store.syncCopiesFromDB();
-    this.store.syncLivePrices$();
-    await this.store.syncPositionsFromTarget();
-    await this.store.syncPositionsFromOrigin();
-
-    // const trader = new Trader();
-    // trader.name = 'Amazing_';
-    // trader.traderId = 'b9b34f738fb03d50a297';
-    // const traders = await this.db.getTraders();
-    // console.log(traders);
-    // const originPositions = await this.bitget.getTraderLivePositions(trader);
+    await this.loadCopiesFromDB();
+    this.syncOriginLiveCryptoPrices$();
+    await this.syncOriginLiveQtys();
+    await this.syncTargetPositions();
   }
 
-  applyTargetPositions() {}
+  private async loadCopiesFromDB() {
+    const dbCopies = await this.db.getCopies();
+    this.store.setCopiesFromDB(dbCopies);
+  }
+
+  private syncOriginLiveCryptoPrices$() {
+    this.bybit
+      .getLivePrice$()
+      .pipe(tap((ticker) => this.store.setLivePrices$(ticker)))
+      .subscribe();
+  }
+
+  private async syncOriginLiveQtys() {
+    // Initializes origin (bybit) user's live position qtys
+    const pos = await this.bybit.getTargetPositions();
+    this.store.setLiveQtys(pos);
+
+    // Syncs origin (bybit) user's live position qtys
+    this.bybit
+      .getTargetPositions$()
+      .pipe(tap(() => this.store.setLiveQtys(pos)))
+      .subscribe();
+  }
+
+  private async syncTargetPositions() {}
 }

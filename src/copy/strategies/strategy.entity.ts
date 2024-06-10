@@ -1,6 +1,5 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.utils';
-import { AllowedSymbols } from '../copy.config';
 import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
 /**
@@ -18,7 +17,7 @@ export class Strategy {
   traderId: string;
 
   @Column({ default: 50 })
-  maxOrders: number;
+  maxOrders?: number;
 
   @Column('decimal', {
     precision: 3,
@@ -26,7 +25,9 @@ export class Strategy {
     default: 0.5,
     transformer: new ColumnNumericTransformer(),
   })
-  maxPriceChange: number;
+  maxPriceChange?: number;
 
-  allowedSymbols = AllowedSymbols;
+  allowedSymbols: SYMBOL[];
+
+  maxSymbols: number;
 }

@@ -1,43 +1,124 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
-import { map, tap } from 'rxjs/operators';
-import { Observable, timer } from 'rxjs';
+import {
+  catchError,
+  distinctUntilChanged,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
+import { Observable, Subject, of, timer } from 'rxjs';
 import { IBybitRequest } from './request.interface';
 import { filterMarkPrice } from './filterMarkPrice.utils';
-import { unSubscribeTicker } from './unsubscribeTicker';
-import { subscribeTicker } from './subscribeTicker';
+import { subscribePublic } from './subscribePublic';
 import { ping } from './pingTicker';
 import { ITicker } from './response/ticker.interface';
+import { subscribePrivate } from './subscribePrivate';
+import { authPrivate } from './utils/authPrivate.utils';
+import { IBybitPosition } from './response/position.interface';
 
 @Injectable()
 export class BybitWSService {
-  ws_url = 'wss://stream.bybit.com/v5/public/linear';
-  private socket$: WebSocketSubject<IBybitRequest>;
+  ws_public_url = 'wss://stream.bybit.com/v5/public/linear';
+  ws_private_url = 'wss://stream-demo.bybit.com/v5/private';
+  private publicSocket$: WebSocketSubject<IBybitRequest<ITicker>>;
+  private privateSocket$: WebSocketSubject<IBybitRequest<IBybitPosition[]>>;
+  private shouldReconnectPublic$ = new Subject<void>();
+  private shouldReconnectPrivate$ = new Subject<void>();
 
   constructor() {
-    this.socket$ = webSocket<IBybitRequest>(this.ws_url);
-    this.subscribeTicker();
-    this.ping();
+    this.initPublicSocket();
+    this.initPrivateSocket();
   }
 
-  getMarkPrice$(): Observable<ITicker | undefined> {
-    return this.socket$.pipe(
-      filterMarkPrice(),
-      map((message) => message.data),
-    );
-  }
+  private initPublicSocket() {
+    this.publicSocket$ = webSocket<IBybitRequest<ITicker>>({
+      url: this.ws_public_url,
+      closeObserver: {
+        next: (closeEvent) => {
+          console.log('⛔ PublicWS Closed:', closeEvent);
+          this.shouldReconnectPublic$.next();
+        },
+      },
+      openObserver: {
+        next: () => {
+          console.log('✅ PublicWS Opened');
+          this.subscribePublic(); // Subscribe after reconnect
+        },
+      },
+    });
 
-  ping() {
-    timer(0, 20000)
-      .pipe(tap(() => this.socket$.next(ping())))
+    this.shouldReconnectPublic$
+      .pipe(
+        switchMap(() =>
+          timer(1000).pipe(takeUntil(this.shouldReconnectPublic$)),
+        ),
+        tap(() => this.initPublicSocket()),
+      )
       .subscribe();
   }
 
-  subscribeTicker() {
-    this.socket$.next(subscribeTicker());
+  private initPrivateSocket() {
+    this.privateSocket$ = webSocket<IBybitRequest<IBybitPosition[]>>({
+      url: this.ws_private_url,
+      closeObserver: {
+        next: (closeEvent) => {
+          console.log('⛔ PrivateWS Closed:', closeEvent);
+          this.shouldReconnectPrivate$.next();
+        },
+      },
+      openObserver: {
+        next: () => {
+          console.log('✅ PrivateWS Opened');
+          this.subscribePrivate(); // Subscribe after reconnect
+        },
+      },
+    });
+
+    this.shouldReconnectPrivate$
+      .pipe(
+        switchMap(() =>
+          timer(20000).pipe(takeUntil(this.shouldReconnectPrivate$)),
+        ),
+        tap(() => this.initPrivateSocket()),
+      )
+      .subscribe();
+    this.ping$().subscribe();
   }
 
-  unsubscribeTicker() {
-    this.socket$.next(unSubscribeTicker());
+  getLivePrice$(): Observable<ITicker | undefined> {
+    return this.publicSocket$.pipe(
+      filterMarkPrice(),
+      map((message) => message.data),
+      catchError((error) => {
+        console.error('GetMarkPrice$ error:', error);
+        return of(undefined); // Replace the error with 0
+      }),
+    );
+  }
+
+  getUserLivePositions$(): Observable<IBybitPosition[] | undefined> {
+    return this.privateSocket$.pipe(
+      catchError((error) => {
+        console.log('getUserLivePositions ERROR', error);
+        return of(undefined);
+      }),
+      map((positions) => positions?.data),
+      distinctUntilChanged(),
+    );
+  }
+
+  ping$() {
+    return timer(0, 1000).pipe(tap(() => this.privateSocket$.next(ping())));
+  }
+
+  subscribePrivate() {
+    this.privateSocket$.next(authPrivate());
+    this.privateSocket$.next(subscribePrivate());
+  }
+
+  subscribePublic() {
+    this.publicSocket$.next(subscribePublic());
   }
 }
