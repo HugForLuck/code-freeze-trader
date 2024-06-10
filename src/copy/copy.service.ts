@@ -26,9 +26,9 @@ export class CopyService {
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
     await this.loadCopiesFromDB();
-    this.syncOriginLiveCryptoPrices$();
-    await this.syncOriginLiveQtys();
-    await this.syncTargetPositions();
+    this.syncTargetLiveCryptoPrices$();
+    await this.syncTargetLiveQtys();
+    await this.syncOriginPositions();
   }
 
   private async loadCopiesFromDB() {
@@ -36,14 +36,14 @@ export class CopyService {
     this.store.setCopiesFromDB(dbCopies);
   }
 
-  private syncOriginLiveCryptoPrices$() {
+  private syncTargetLiveCryptoPrices$() {
     this.bybit
       .getLivePrice$()
       .pipe(tap((ticker) => this.store.setLivePrices$(ticker)))
       .subscribe();
   }
 
-  private async syncOriginLiveQtys() {
+  private async syncTargetLiveQtys() {
     // Initializes origin (bybit) user's live position qtys
     const pos = await this.bybit.getTargetPositions();
     this.store.setLiveQtys(pos);
@@ -55,5 +55,5 @@ export class CopyService {
       .subscribe();
   }
 
-  private async syncTargetPositions() {}
+  private async syncOriginPositions() {}
 }
