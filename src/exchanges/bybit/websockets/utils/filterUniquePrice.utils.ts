@@ -7,10 +7,10 @@ export function filterUniquePrice(
   source$: Observable<IBybitRequest<ITicker>>,
 ): Observable<ITicker> {
   return source$.pipe(
-    filterMarkPrice(),
+    filterMarkPrice(), // excludes non markPrice responses (e.g. pongs, etc.)
     map((message) => message.data),
     distinctUntilChanged<ITicker>(
       (pTicker, cTicker) => pTicker?.markPrice === cTicker?.markPrice,
-    ),
+    ), // compare previous with current value, only emits if they are different
   );
 }
