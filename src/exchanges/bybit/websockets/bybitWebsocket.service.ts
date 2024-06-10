@@ -113,11 +113,12 @@ export class BybitWSService {
     this.shouldReconnectPrivate$
       .pipe(
         switchMap(() =>
-          timer(1000).pipe(takeUntil(this.shouldReconnectPrivate$)),
+          timer(20000).pipe(takeUntil(this.shouldReconnectPrivate$)),
         ),
         tap(() => this.initPrivateSocket()),
       )
       .subscribe();
+    this.ping$().subscribe();
   }
 
   getLivePrice$(): Observable<ITicker | undefined> {
