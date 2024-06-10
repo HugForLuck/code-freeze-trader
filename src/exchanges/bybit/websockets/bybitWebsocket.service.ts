@@ -1,6 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
-import { catchError, map, switchMap, takeUntil, tap } from 'rxjs/operators';
+import {
+  catchError,
+  distinctUntilChanged,
+  map,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { Observable, Subject, of, timer } from 'rxjs';
 import { IBybitRequest } from './request.interface';
 import { filterMarkPrice } from './filterMarkPrice.utils';
@@ -91,12 +98,19 @@ export class BybitWSService {
     );
   }
 
-  ping$() {
-    return timer(0, 1000).pipe(tap(() => this.privateSocket$.next(ping())));
+  getUserLivePositions$(): Observable<IBybitPosition[] | undefined> {
+    return this.privateSocket$.pipe(
+      catchError((error) => {
+        console.log('getUserLivePositions ERROR', error);
+        return of(undefined);
+      }),
+      map((positions) => positions?.data),
+      distinctUntilChanged(),
+    );
   }
 
-  getLivePositions$(): Observable<IBybitPosition[] | undefined> {
-    return this.privateSocket$.pipe(map((positions) => positions.data));
+  ping$() {
+    return timer(0, 1000).pipe(tap(() => this.privateSocket$.next(ping())));
   }
 
   subscribePrivate() {

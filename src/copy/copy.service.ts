@@ -28,21 +28,11 @@ export class CopyService {
     const dbCopies = await this.db.getCopies();
     this.store.setCopiesFromDB(dbCopies);
     this.setLivePrices$();
-    this.bybit.getUserLivePositions$().subscribe({
-      next: (value) => console.log(value),
+    this.bybit.getTargetPositions$().subscribe({
+      next: (pos) => this.store.setLiveQtys(pos),
       error: (error) => console.log('ERRORED', error),
       complete: () => console.log('COMPLETED'),
     });
-
-    // await this.store.syncPositionsFromTarget();
-    // await this.store.syncPositionsFromOrigin();
-
-    // const trader = new Trader();
-    // trader.name = 'Amazing_';
-    // trader.traderId = 'b9b34f738fb03d50a297';
-    // const traders = await this.db.getTraders();
-    // console.log(traders);
-    // const originPositions = await this.bitget.getTraderLivePositions(trader);
   }
 
   private setLivePrices$() {

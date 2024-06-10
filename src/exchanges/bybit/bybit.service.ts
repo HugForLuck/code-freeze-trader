@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { SIDE } from '../api/side.enum';
 import { DIR } from 'src/shared/enums/dir.enum';
-import { IPositionInfo } from './http/responses/positionInfoResponse.interface';
-import { isSYMBOL } from 'src/shared/utils/isSymbol.utils';
-import { isSIDE } from './utils/isSide.utils';
-import isNumber from 'src/shared/utils/isNumber.utils';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
 import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
 import { BybitHttpService } from './http/bybitHttp.service';
 import { BybitWSService } from './websockets/bybitWebsocket.service';
-import { filter, retry, tap } from 'rxjs';
+import { filter, map, retry } from 'rxjs';
+import { IBybitPosition } from './websockets/response/position.interface';
+import { toSymbol } from 'src/shared/utils/toSymbol.utils';
+import { IPosition } from 'src/copy/position.interface';
+import { getDir } from './utils/getDir.utils';
 
 /**
  *
@@ -36,23 +36,21 @@ export class Bybit {
     return targetPositions;
   }
 
-  getUserLivePositions$() {
-    return this.ws.getLivePositions$().pipe(
+  getTargetPositions$() {
+    return this.ws.getUserLivePositions$().pipe(
       filter((pos) => pos !== undefined),
+      map((pos: IBybitPosition[]): IPosition[] =>
+        pos.map<IPosition>((p) => ({
+          symbol: toSymbol(p.symbol),
+          dir: getDir(p.side),
+          liveQty: +p.size,
+        })),
+      ),
       retry(),
-      tap(console.log),
     );
   }
 
   getLivePrice$() {
     return this.ws.getLivePrice$();
-  }
-
-  private isValid(position: IPositionInfo): boolean {
-    if (position == null) return false;
-    const symbolIsValid = isSYMBOL(position.symbol);
-    const sideIsValid = isSIDE(position.side);
-    const size = isNumber(position.size);
-    return symbolIsValid && sideIsValid && size;
   }
 }

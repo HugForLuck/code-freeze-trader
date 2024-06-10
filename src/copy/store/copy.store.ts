@@ -18,7 +18,8 @@ import {
 import { ICopyState, initialCopyState } from '../copyState';
 import { ACTION, copyActions } from './action.enum';
 import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
-import { IBybitPosition } from 'src/exchanges/bybit/websockets/response/position.interface';
+import { IPosition } from '../position.interface';
+import { setTargetLiveQtys } from '../utils/setTargetLiveQtys.utils';
 
 /**
  *
@@ -37,7 +38,7 @@ export class CopyStore {
 
     // this.select$((state) => state).subscribe(console.log);
     // this.getStatus$().subscribe(console.log);
-    // this.getCopies$().subscribe(console.log);
+    this.getCopies$().subscribe(console.log);
     // this.getPrices$().subscribe(console.log);
   }
 
@@ -55,6 +56,11 @@ export class CopyStore {
         return {
           ...state,
           copies: setTargetLivePrice(state.copies, action.payload),
+        };
+      case ACTION.SET_ORIGIN_LIVE_QTYS:
+        return {
+          ...state,
+          copies: setTargetLiveQtys(state.copies, action.payload),
         };
       default:
         return state;
@@ -76,8 +82,9 @@ export class CopyStore {
     this.dispatch(copyActions.setMarkPrices(ticker));
   }
 
-  setPositions$(position: IBybitPosition[]) {
-    console.log(position);
+  setLiveQtys(positions: IPosition[]) {
+    if (!positions) return;
+    this.dispatch(copyActions.setLiveQtys(positions));
   }
 
   /**
