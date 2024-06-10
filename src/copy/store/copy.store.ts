@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Copy } from '../copy.entity';
 import { STATUS } from './status.enum';
 import { DBService } from 'src/db/db.service';
-import { Bitget } from 'src/exchanges/bitget/http/bitget.service';
 import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
 import { getLiveCopies, getOpenCopies } from '../utils/copyFilter.utls';
 import { setTargetLivePrice } from '../utils/setTargetLivePrice.utils';
@@ -18,6 +17,7 @@ import { ACTION, copyActions } from './action.enum';
 import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
 import { IPosition } from '../position.interface';
 import { setTargetLiveQtys } from '../utils/setTargetLiveQtys.utils';
+import { Bitget } from 'src/exchanges/bitget/bitget.service';
 
 /**
  *

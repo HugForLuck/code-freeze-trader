@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
-import { Bitget } from 'src/exchanges/bitget/http/bitget.service';
 import { CopyStore } from './store/copy.store';
 import { tap } from 'rxjs';
 import { Bybit } from 'src/exchanges/bybit/bybit.service';
+import { Bitget } from 'src/exchanges/bitget/bitget.service';
 
 /**
  *
