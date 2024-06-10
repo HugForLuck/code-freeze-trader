@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
-import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
+import { Bitget } from 'src/exchanges/bitget/http/bitget.service';
 import { CopyStore } from './store/copy.store';
 import { tap } from 'rxjs';
 import { Bybit } from 'src/exchanges/bybit/bybit.service';
@@ -18,29 +18,42 @@ import { Bybit } from 'src/exchanges/bybit/bybit.service';
 export class CopyService {
   constructor(
     private readonly bybit: Bybit,
-    private readonly bitget: BitgetMiddleware,
+    private readonly bitget: Bitget,
     private readonly db: DBService,
     private readonly store: CopyStore,
   ) {}
 
   @OnEvent(COPY_ACTIONS.INIT)
   async init() {
-    const dbCopies = await this.db.getCopies();
-    this.store.setCopiesFromDB(dbCopies);
-    this.setLivePrices$();
-    this.bybit.getTargetPositions$().subscribe({
-      next: (pos) => this.store.setLiveQtys(pos),
-      error: (error) => console.log('ERRORED', error),
-      complete: () => console.log('COMPLETED'),
-    });
+    await this.loadCopiesFromDB();
+    this.syncOriginLiveCryptoPrices$();
+    await this.syncOriginLiveQtys();
+    await this.syncTargetPositions();
   }
 
-  private setLivePrices$() {
+  private async loadCopiesFromDB() {
+    const dbCopies = await this.db.getCopies();
+    this.store.setCopiesFromDB(dbCopies);
+  }
+
+  private syncOriginLiveCryptoPrices$() {
     this.bybit
       .getLivePrice$()
       .pipe(tap((ticker) => this.store.setLivePrices$(ticker)))
       .subscribe();
   }
 
-  applyTargetPositions() {}
+  private async syncOriginLiveQtys() {
+    // Initializes origin (bybit) user's live position qtys
+    const pos = await this.bybit.getTargetPositions();
+    this.store.setLiveQtys(pos);
+
+    // Syncs origin (bybit) user's live position qtys
+    this.bybit
+      .getTargetPositions$()
+      .pipe(tap(() => this.store.setLiveQtys(pos)))
+      .subscribe();
+  }
+
+  private async syncTargetPositions() {}
 }

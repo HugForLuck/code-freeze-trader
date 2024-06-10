@@ -4,7 +4,7 @@ import { STATUS } from './status.enum';
 import { TargetPosition } from '../targetPositions/targetPosition.entity';
 import { TARGET_STATE } from '../targetPositions/targetState.enum';
 import { DBService } from 'src/db/db.service';
-import { BitgetMiddleware } from 'src/exchanges/bitget/http/bitget.service';
+import { Bitget } from 'src/exchanges/bitget/http/bitget.service';
 import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
 import { getLiveCopies, getOpenCopies } from '../utils/copyFilter.utls';
 import { setTargetLivePrice } from '../utils/setTargetLivePrice.utils';
@@ -32,7 +32,7 @@ export class CopyStore {
 
   constructor(
     private readonly db: DBService,
-    private readonly bitget: BitgetMiddleware,
+    private readonly bitget: Bitget,
   ) {
     this.state$ = new BehaviorSubject<ICopyState>(initialCopyState);
 
