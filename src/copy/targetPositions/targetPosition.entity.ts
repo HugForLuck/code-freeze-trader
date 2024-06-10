@@ -1,7 +1,6 @@
 import { DIR } from 'src/shared/enums/dir.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { ITargetPosition } from './targetPosition.interface';
-import { ColumnNumericTransformer } from 'src/db/utils/columnNumericTransformer.utils';
 import { TARGET_EXCHANGE } from '../targetExchange.enum';
 import { TARGET_STATE } from './targetState.enum';
 import { SYMBOL } from 'src/shared/enums/symbol.enum';
@@ -13,7 +12,7 @@ export class TargetPosition implements ITargetPosition {
    * Sets status of the store
    *
    */
-  private _state = TARGET_STATE.NO_QTY_IN_DB;
+  private _state = TARGET_STATE.TARGET_NOT_INITIALIZED;
   get state() {
     return this._state;
   }
@@ -28,11 +27,11 @@ export class TargetPosition implements ITargetPosition {
     symbol: SYMBOL,
     dir: DIR,
     targetExchange: TARGET_EXCHANGE,
-    liveQty: number,
+    liveQty: string,
   ) {
     this.symbol = symbol;
     this.dir = dir;
-    this.liveQty = liveQty;
+    this.liveQty = liveQty ?? '';
     this.targetExchange = targetExchange;
   }
 
@@ -52,25 +51,15 @@ export class TargetPosition implements ITargetPosition {
    * a strategy determines how much balance is available for each copy/position
    *
    */
-  @Column('decimal', {
-    precision: 17,
-    scale: 10,
-    default: null,
-    transformer: new ColumnNumericTransformer(),
-  })
-  maxAvailableBalance: number | null;
+  @Column({ default: '' })
+  maxAvailableBalance: string = '';
 
-  @Column('decimal', {
-    precision: 17,
-    scale: 10,
-    default: null,
-    transformer: new ColumnNumericTransformer(),
-  })
-  initialPrice: number | null = null;
+  @Column({ default: '' })
+  initialPrice: string = '';
 
-  livePrice: number | null = null;
+  livePrice = '';
 
-  liveQty: number | null = null;
+  liveQty = '';
 
   /**
    *

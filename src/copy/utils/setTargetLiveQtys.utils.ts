@@ -1,16 +1,16 @@
 import { Copy } from '../copy.entity';
-import { IPosition } from '../position.interface';
+import { TargetPosition } from '../targetPositions/targetPosition.entity';
 
 export function setTargetLiveQtys(
   copies: Copy[],
-  positions?: IPosition[],
+  positions?: TargetPosition[],
 ): Copy[] {
   if (positions == undefined || positions?.length == 0) return copies;
 
   for (const p of positions) {
     copies.forEach((copy) => {
       if (copy.symbol == p.symbol && copy.dir == p.dir) {
-        copy.targetPosition.liveQty = p.liveQty ?? 0;
+        copy.targetPosition.liveQty = p.liveQty;
       }
       return copy;
     });

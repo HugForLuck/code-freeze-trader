@@ -28,6 +28,7 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^10.0.2",
     "axios": "^1.7.2",
+    "decimal.js": "^10.0.0",
     "mysql2": "^3.10.0",
     "ntp-time-sync": "^0.4.1",
     "reflect-metadata": "^0.2.0",

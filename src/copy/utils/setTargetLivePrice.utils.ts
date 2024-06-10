@@ -6,7 +6,7 @@ export function setTargetLivePrice(copies: Copy[], ticker?: ITicker): Copy[] {
     return [
       ...copies.map((copy) => {
         if (copy.symbol == ticker?.symbol) {
-          copy.targetPosition.livePrice = +ticker.markPrice;
+          copy.targetPosition.livePrice = ticker.markPrice;
         }
         return copy;
       }),

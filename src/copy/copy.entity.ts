@@ -51,8 +51,8 @@ export class Copy implements ICopy {
   }
 
   resetTarget() {
-    this.targetPosition.initialPrice = null;
-    this.targetPosition.maxAvailableBalance = null;
-    this.targetPosition.liveQty = null;
+    this.targetPosition.initialPrice = '';
+    this.targetPosition.maxAvailableBalance = '';
+    this.targetPosition.liveQty = '';
   }
 }

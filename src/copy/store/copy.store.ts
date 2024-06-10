@@ -20,6 +20,7 @@ import { ACTION, copyActions } from './action.enum';
 import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
 import { IPosition } from '../position.interface';
 import { setTargetLiveQtys } from '../utils/setTargetLiveQtys.utils';
+import Decimal from 'decimal.js';
 
 /**
  *
@@ -189,15 +190,15 @@ export class CopyStore {
       // TODO check properly when to update, delete/remove or copies different
       const foundTargetPos = targetPositions.find(copy.isCopy);
       if (foundTargetPos) {
-        if (copy.targetPosition.initialPrice == 0) {
-          copy.targetPosition.state = TARGET_STATE.NO_QTY_IN_DB;
+        if (copy.targetPosition.initialPrice == '') {
+          copy.targetPosition.state = TARGET_STATE.TARGET_NO_QTY_IN_DB;
           console.log('TargetPosition has 0 liveQty in db!');
         } else {
           copy.targetPosition.state = TARGET_STATE.LOADED_INTO_STORE;
           copy.targetPosition = foundTargetPos;
           isUpdated = true;
         }
-      } else if (copy.targetPosition.initialPrice ?? 0 > 0) {
+      } else if (new Decimal(copy.targetPosition.initialPrice).greaterThan(0)) {
         copy.resetTarget();
         this.db.saveCopies([copy]);
       }

@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { SIDE } from '../api/side.enum';
-import { DIR } from 'src/shared/enums/dir.enum';
 import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
 import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
 import { BybitHttpService } from './http/bybitHttp.service';
@@ -10,6 +8,7 @@ import { IBybitPosition } from './websockets/response/position.interface';
 import { toSymbol } from 'src/shared/utils/toSymbol.utils';
 import { IPosition } from 'src/copy/position.interface';
 import { getDir } from './utils/getDir.utils';
+import Decimal from 'decimal.js';
 
 /**
  *
@@ -27,10 +26,9 @@ export class Bybit {
     const bybitPositions = await this.http.getUserLivePositions();
     const targetPositions: TargetPosition[] = [];
     for (const p of bybitPositions) {
-      const dir = p.side == SIDE.BUY ? DIR.LONG : DIR.SHORT;
-      const liveQty = +p.size;
+      const dir = getDir(p.side);
       const target = TARGET_EXCHANGE.BYBIT;
-      const targetPosition = new TargetPosition(p.symbol, dir, target, liveQty);
+      const targetPosition = new TargetPosition(p.symbol, dir, target, p.size);
       if (+p.size > 0) targetPositions.push(targetPosition);
     }
     return targetPositions;
@@ -43,7 +41,7 @@ export class Bybit {
         pos.map<IPosition>((p) => ({
           symbol: toSymbol(p.symbol),
           dir: getDir(p.side),
-          liveQty: +p.size,
+          liveQty: new Decimal(p.size),
         })),
       ),
       retry(),

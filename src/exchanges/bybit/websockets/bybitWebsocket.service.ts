@@ -91,6 +91,9 @@ export class BybitWSService {
     return this.publicSocket$.pipe(
       filterMarkPrice(),
       map((message) => message.data),
+      distinctUntilChanged(
+        (pTicker, cTicker) => pTicker?.markPrice === cTicker?.markPrice,
+      ),
       catchError((error) => {
         console.error('GetMarkPrice$ error:', error);
         return of(undefined); // Replace the error with 0
