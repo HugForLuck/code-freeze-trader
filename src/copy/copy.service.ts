@@ -3,7 +3,7 @@ import { COPY_ACTIONS } from './copy.actions';
 import { OnEvent } from '@nestjs/event-emitter';
 import { DBService } from 'src/db/db.service';
 import { CopyStore } from './store/copy.store';
-import { tap } from 'rxjs';
+import { filter, tap } from 'rxjs';
 import { Bybit } from 'src/exchanges/bybit/bybit.service';
 import { Bitget } from 'src/exchanges/bitget/bitget.service';
 
@@ -59,5 +59,22 @@ export class CopyService {
     this.store.setCopiesFromDB(dbCopies);
   }
 
-  private async syncOriginPositions() {}
+  private async syncOriginPositions() {
+    // load open copies from store
+    // if open copies > 0
+    // => get bitget traders
+    // => get bitget positions
+    // => create/send orders
+    const traders = await this.db.getTraders();
+    console.log(traders);
+    const originOpenPos = [];
+    for (const trader of traders) {
+      originOpenPos.push(...(await this.bitget.getTraderLivePositions(trader)));
+    }
+    console.log(originOpenPos);
+    // this.store
+    //   .getOpenCopies$()
+    //   .pipe(filter((copies) => copies.length > 0))
+    //   .subscribe(console.log);
+  }
 }

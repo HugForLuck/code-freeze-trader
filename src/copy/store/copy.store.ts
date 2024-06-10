@@ -18,6 +18,7 @@ import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interfac
 import { IPosition } from '../position.interface';
 import { setTargetLiveQtys } from '../utils/setTargetLiveQtys.utils';
 import { Bitget } from 'src/exchanges/bitget/bitget.service';
+import { getFirstOriginOpenPosition } from './utils/getFirstOriginOpenPosition.utils';
 
 /**
  *
@@ -36,7 +37,7 @@ export class CopyStore {
 
     // this.select$((state) => state).subscribe(console.log);
     // this.getStatus$().subscribe(console.log);
-    this.getCopies$().subscribe(console.log);
+    // this.getCopies$().subscribe(console.log);
     // this.getPrices$().subscribe(console.log);
   }
 
@@ -110,6 +111,10 @@ export class CopyStore {
       map((state) => state.copies),
       distinctUntilChanged(),
     );
+  }
+
+  getOpenCopies$() {
+    return this.state$.asObservable().pipe(getFirstOriginOpenPosition);
   }
 
   getPrices$() {
@@ -208,7 +213,7 @@ export class CopyStore {
 
   async syncPositionsFromOrigin() {
     // await this.syncLivePositionsFromOrigin();
-    // await this.syncOpenPositionsFromOrigin();
+    await this.syncOpenPositionsFromOrigin();
   }
 
   private async syncLivePositionsFromOrigin() {
