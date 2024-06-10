@@ -22,10 +22,10 @@ export class Strategy {
   @Column('decimal', {
     precision: 3,
     scale: 2,
-    default: 0.5,
+    default: '0.5',
     transformer: new ColumnNumericTransformer(),
   })
-  maxPriceChange?: number;
+  maxPriceChange: string;
 
   allowedSymbols: SYMBOL[];
 

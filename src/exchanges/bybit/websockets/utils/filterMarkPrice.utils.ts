@@ -1,7 +1,7 @@
 import { MonoTypeOperatorFunction, filter } from 'rxjs';
-import { IBybitRequest } from './request.interface';
+import { IBybitRequest } from '../request.interface';
 import { AllowedSymbols } from 'src/copy/copy.config';
-import { ITicker } from './response/ticker.interface';
+import { ITicker } from '../response/ticker.interface';
 
 export function filterMarkPrice(): MonoTypeOperatorFunction<
   IBybitRequest<ITicker>

@@ -37,7 +37,7 @@ export class OriginPosition {
 
   traderLiveOrders: number | null;
 
-  traderBestPrice: number | null;
+  traderBestPrice = '';
 
   private filterOrders(orders: ITraderLiveOrder[]) {
     return orders.filter(
@@ -46,10 +46,10 @@ export class OriginPosition {
   }
 
   private getBestPrice(orders: ITraderLiveOrder[], dir: DIR) {
-    if (orders.length == 0) return 0;
+    if (orders.length == 0) return '';
     orders.sort((a, b) => +a.openPriceAvg - +b.openPriceAvg);
     const bestPriceIndex = dir === DIR.LONG ? 0 : -1;
     const bestPriceOrder = orders.at(bestPriceIndex);
-    return bestPriceOrder ? +bestPriceOrder.openPriceAvg : 0;
+    return bestPriceOrder ? bestPriceOrder.openPriceAvg : '';
   }
 }

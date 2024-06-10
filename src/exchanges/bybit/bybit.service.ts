@@ -8,7 +8,6 @@ import { IBybitPosition } from './websockets/response/position.interface';
 import { toSymbol } from 'src/shared/utils/toSymbol.utils';
 import { IPosition } from 'src/copy/position.interface';
 import { getDir } from './utils/getDir.utils';
-import Decimal from 'decimal.js';
 
 /**
  *
@@ -22,7 +21,7 @@ export class Bybit {
     private readonly ws: BybitWSService,
   ) {}
 
-  async getTargetPositions(): Promise<TargetPosition[]> {
+  async getUserLivePositions(): Promise<TargetPosition[]> {
     const bybitPositions = await this.http.getUserLivePositions();
     const targetPositions: TargetPosition[] = [];
     for (const p of bybitPositions) {
@@ -34,21 +33,21 @@ export class Bybit {
     return targetPositions;
   }
 
-  getTargetPositions$() {
+  getUserLivePositions$() {
     return this.ws.getUserLivePositions$().pipe(
       filter((pos) => pos !== undefined),
       map((pos: IBybitPosition[]): IPosition[] =>
         pos.map<IPosition>((p) => ({
           symbol: toSymbol(p.symbol),
           dir: getDir(p.side),
-          liveQty: new Decimal(p.size),
+          liveQty: p.size,
         })),
       ),
       retry(),
     );
   }
 
-  getLivePrice$() {
-    return this.ws.getLivePrice$();
+  getLivePrices$() {
+    return this.ws.getLivePrices$();
   }
 }

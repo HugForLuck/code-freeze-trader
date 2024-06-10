@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Copy } from '../copy.entity';
 import { STATUS } from './status.enum';
-import { TargetPosition } from '../targetPositions/targetPosition.entity';
-import { TARGET_STATE } from '../targetPositions/targetState.enum';
 import { DBService } from 'src/db/db.service';
 import { Bitget } from 'src/exchanges/bitget/http/bitget.service';
 import { getUniqueSymbols } from 'src/shared/utils/getUniqueSymbols.utils';
@@ -20,7 +18,6 @@ import { ACTION, copyActions } from './action.enum';
 import { ITicker } from 'src/exchanges/bybit/websockets/response/ticker.interface';
 import { IPosition } from '../position.interface';
 import { setTargetLiveQtys } from '../utils/setTargetLiveQtys.utils';
-import Decimal from 'decimal.js';
 
 /**
  *
@@ -181,33 +178,33 @@ export class CopyStore {
   //   if (isUpdated) this.db.saveCopies(this.copies);
   // }
 
-  private patchTargetPositions(targetPositions: TargetPosition[]) {
-    this.state = STATUS.LOADING_REMOTE_TARGETS;
-    let isUpdated = false;
+  // private patchTargetPositions(targetPositions: TargetPosition[]) {
+  //   this.state = STATUS.LOADING_REMOTE_TARGETS;
+  //   let isUpdated = false;
 
-    // apply targetPos to store copy
-    this.copies.forEach((copy) => {
-      // TODO check properly when to update, delete/remove or copies different
-      const foundTargetPos = targetPositions.find(copy.isCopy);
-      if (foundTargetPos) {
-        if (copy.targetPosition.initialPrice == '') {
-          copy.targetPosition.state = TARGET_STATE.TARGET_NO_QTY_IN_DB;
-          console.log('TargetPosition has 0 liveQty in db!');
-        } else {
-          copy.targetPosition.state = TARGET_STATE.LOADED_INTO_STORE;
-          copy.targetPosition = foundTargetPos;
-          isUpdated = true;
-        }
-      } else if (new Decimal(copy.targetPosition.initialPrice).greaterThan(0)) {
-        copy.resetTarget();
-        this.db.saveCopies([copy]);
-      }
-      copy.targetPosition.waitsForNewCopy();
-    });
+  //   // apply targetPos to store copy
+  //   this.copies.forEach((copy) => {
+  //     // TODO check properly when to update, delete/remove or copies different
+  //     const foundTargetPos = targetPositions.find(copy.isCopy);
+  //     if (foundTargetPos) {
+  //       if (copy.targetPosition.initialPrice == '') {
+  //         copy.targetPosition.state = TARGET_STATE.TARGET_NO_QTY_IN_DB;
+  //         console.log('TargetPosition has 0 liveQty in db!');
+  //       } else {
+  //         copy.targetPosition.state = TARGET_STATE.LOADED_INTO_STORE;
+  //         copy.targetPosition = foundTargetPos;
+  //         isUpdated = true;
+  //       }
+  //     } else if (new Decimal(copy.targetPosition.initialPrice).greaterThan(0)) {
+  //       copy.resetTarget();
+  //       this.db.saveCopies([copy]);
+  //     }
+  //     copy.targetPosition.waitsForNewCopy();
+  //   });
 
-    this.state = STATUS.LOADED_REMOTE_TARGETS;
-    return isUpdated;
-  }
+  //   this.state = STATUS.LOADED_REMOTE_TARGETS;
+  //   return isUpdated;
+  // }
 
   async syncPositionsFromOrigin() {
     // await this.syncLivePositionsFromOrigin();

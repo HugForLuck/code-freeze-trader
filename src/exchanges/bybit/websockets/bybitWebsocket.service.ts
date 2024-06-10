@@ -10,13 +10,13 @@ import {
 } from 'rxjs/operators';
 import { Observable, Subject, of, timer } from 'rxjs';
 import { IBybitRequest } from './request.interface';
-import { filterMarkPrice } from './filterMarkPrice.utils';
 import { subscribePublic } from './subscribePublic';
 import { ping } from './pingTicker';
 import { ITicker } from './response/ticker.interface';
 import { subscribePrivate } from './subscribePrivate';
 import { authPrivate } from './utils/authPrivate.utils';
 import { IBybitPosition } from './response/position.interface';
+import { filterUniquePrice } from './utils/filterUniquePrice.utils';
 
 @Injectable()
 export class BybitWSService {
@@ -87,13 +87,9 @@ export class BybitWSService {
     this.ping$().subscribe();
   }
 
-  getLivePrice$(): Observable<ITicker | undefined> {
+  getLivePrices$(): Observable<ITicker | undefined> {
     return this.publicSocket$.pipe(
-      filterMarkPrice(),
-      map((message) => message.data),
-      distinctUntilChanged(
-        (pTicker, cTicker) => pTicker?.markPrice === cTicker?.markPrice,
-      ),
+      filterUniquePrice,
       catchError((error) => {
         console.error('GetMarkPrice$ error:', error);
         return of(undefined); // Replace the error with 0
