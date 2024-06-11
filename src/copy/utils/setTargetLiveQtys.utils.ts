@@ -1,5 +1,5 @@
 import { Copy } from '../copy.entity';
-import { TargetPosition } from '../targetPositions/targetPosition.entity';
+import { TargetPosition } from '../target/targetPosition.entity';
 
 export function setTargetLiveQtys(
   copies: Copy[],

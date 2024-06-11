@@ -1,8 +1,8 @@
 import { DIR } from 'src/shared/enums/dir.enum';
 import { Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
-import { TARGET_EXCHANGE } from './targetExchange.enum';
-import { TargetPosition } from './targetPositions/targetPosition.entity';
-import { OriginPosition } from './originPosition.ts/originPosition.entity';
+import { TARGET_EXCHANGE } from './target/targetExchange.enum';
+import { TargetPosition } from './target/targetPosition.entity';
+import { OriginPosition } from './origin/originPosition.entity';
 import { ICopy } from './copy.interface';
 import { IPosition } from './position.interface';
 import { SYMBOL } from 'src/shared/enums/symbol.enum';

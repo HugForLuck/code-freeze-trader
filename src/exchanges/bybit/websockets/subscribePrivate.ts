@@ -1,8 +1,8 @@
 import { IBybitRequest } from './request.interface';
 
-export function subscribePrivate(): IBybitRequest<any> {
+export function subscribePrivate<T>(): IBybitRequest<T> {
   return {
     op: 'subscribe',
-    args: ['position'], // TODO change to position.linear
+    args: ['position', 'wallet'], // TODO change to position.linear
   };
 }

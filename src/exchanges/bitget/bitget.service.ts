@@ -3,7 +3,7 @@ import { BitgetApiService } from './http/bitgetApi.service';
 import { ITraderLiveOrder } from './http/responses/traderLiveOrder.interface';
 import { Trader } from 'src/copy/trader/trader.entity';
 import { AllowedSymbols } from 'src/copy/copy.config';
-import { OriginPosition } from 'src/copy/originPosition.ts/originPosition.entity';
+import { OriginPosition } from 'src/copy/origin/originPosition.entity';
 import { SYMBOL } from 'src/shared/enums/symbol.enum';
 import { DIRS } from 'src/shared/consts/dirs';
 

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
-import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
+import { TargetPosition } from 'src/copy/target/targetPosition.entity';
 import { BybitHttpService } from './http/bybitHttp.service';
 import { BybitWSService } from './websockets/bybitWebsocket.service';
 import { filter, map, retry } from 'rxjs';
@@ -8,6 +7,7 @@ import { IBybitPosition } from './websockets/response/position.interface';
 import { toSymbol } from 'src/shared/utils/toSymbol.utils';
 import { IPosition } from 'src/copy/position.interface';
 import { getDir } from './utils/getDir.utils';
+import { TARGET_EXCHANGE } from 'src/copy/target/targetExchange.enum';
 
 /**
  *
@@ -49,5 +49,9 @@ export class Bybit {
 
   getLivePrices$() {
     return this.ws.getLivePrices$();
+  }
+
+  getUserWallet$() {
+    return this.ws.getUserWallet$().pipe(retry());
   }
 }

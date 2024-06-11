@@ -4,6 +4,7 @@ import { ORIGIN_EXCHANGE } from '../originExchange.enum';
 import { Trader } from '../trader/trader.entity';
 import { SYMBOL } from 'src/shared/enums/symbol.enum';
 import { ITraderLiveOrder } from 'src/exchanges/bitget/http/responses/traderLiveOrder.interface';
+import { getBestPriceByOrders } from './utils/getBestPrice.utils';
 
 @Entity({ name: 'origin_positions' })
 export class OriginPosition {
@@ -20,7 +21,7 @@ export class OriginPosition {
     this.originExchange = originExchange;
     const posOrders = this.filterOrders(orders);
     this.traderLiveOrders = posOrders.length;
-    this.traderBestPrice = this.getBestPrice(posOrders, this.dir);
+    this.traderBestPrice = getBestPriceByOrders(posOrders, this.dir);
   }
 
   @PrimaryColumn()
@@ -45,11 +46,7 @@ export class OriginPosition {
     );
   }
 
-  private getBestPrice(orders: ITraderLiveOrder[], dir: DIR) {
-    if (orders.length == 0) return '';
-    orders.sort((a, b) => +a.openPriceAvg - +b.openPriceAvg);
-    const bestPriceIndex = dir === DIR.LONG ? 0 : -1;
-    const bestPriceOrder = orders.at(bestPriceIndex);
-    return bestPriceOrder ? bestPriceOrder.openPriceAvg : '';
+  get isLong() {
+    return this.dir == DIR.LONG;
   }
 }

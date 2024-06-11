@@ -1,7 +1,7 @@
 import { DIR } from 'src/shared/enums/dir.enum';
 import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { ITargetPosition } from './targetPosition.interface';
-import { TARGET_EXCHANGE } from '../targetExchange.enum';
+import { TARGET_EXCHANGE } from './targetExchange.enum';
 import { TARGET_STATE } from './targetState.enum';
 import { SYMBOL } from 'src/shared/enums/symbol.enum';
 

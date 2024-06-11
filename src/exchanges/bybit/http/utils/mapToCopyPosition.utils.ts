@@ -1,8 +1,8 @@
 import { IPositionInfo } from '../responses/positionInfoResponse.interface';
-import { TargetPosition } from 'src/copy/targetPositions/targetPosition.entity';
-import { ITargetPosition } from 'src/copy/targetPositions/targetPosition.interface';
-import { TARGET_EXCHANGE } from 'src/copy/targetExchange.enum';
+import { TargetPosition } from 'src/copy/target/targetPosition.entity';
+import { ITargetPosition } from 'src/copy/target/targetPosition.interface';
 import { getDir } from '../../utils/getDir.utils';
+import { TARGET_EXCHANGE } from 'src/copy/target/targetExchange.enum';
 
 export function mapToTargetPositions(
   positions: IPositionInfo[],

@@ -1,5 +1,8 @@
 import { Copy } from 'src/copy/copy.entity';
-import { FindManyOptions } from 'typeorm';
+import { Strategy } from 'src/copy/strategies/strategy.entity';
+import { Trader } from 'src/copy/trader/trader.entity';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
+import { FindManyOptions, FindOneOptions } from 'typeorm';
 
 export const copyFindAllOptions: FindManyOptions<Copy> = {
   select: {
@@ -24,3 +27,13 @@ export const copyFindAllOptions: FindManyOptions<Copy> = {
     strategy: true,
   },
 };
+
+export const findOneStrategyOptions = (
+  symbol: SYMBOL,
+  { traderId }: Trader,
+): FindOneOptions<Strategy> => ({
+  where: {
+    symbol,
+    traderId,
+  },
+});

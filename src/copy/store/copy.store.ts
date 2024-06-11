@@ -9,6 +9,7 @@ import {
   BehaviorSubject,
   Observable,
   distinctUntilChanged,
+  firstValueFrom,
   map,
   scan,
 } from 'rxjs';
@@ -19,6 +20,7 @@ import { IPosition } from '../position.interface';
 import { setTargetLiveQtys } from '../utils/setTargetLiveQtys.utils';
 import { Bitget } from 'src/exchanges/bitget/bitget.service';
 import { getFirstOriginOpenPosition } from './utils/getFirstOriginOpenPosition.utils';
+import { SYMBOL } from 'src/shared/enums/symbol.enum';
 
 /**
  *
@@ -91,18 +93,18 @@ export class CopyStore {
    * Selectors for all or substates
    *
    */
-  getStatus$() {
-    return this.state$.asObservable().pipe(
-      map((state) => state.status),
-      distinctUntilChanged(),
-    );
-  }
-
   get$(selector?: (state: ICopyState) => any): Observable<any> {
     return this.state$.asObservable().pipe(
       map((state) => state),
       distinctUntilChanged(),
       scan((acc, state) => (selector ? selector(state) : state), undefined),
+    );
+  }
+
+  getStatus$() {
+    return this.state$.asObservable().pipe(
+      map((state) => state.status),
+      distinctUntilChanged(),
     );
   }
 
@@ -131,6 +133,19 @@ export class CopyStore {
         ).values(),
       ]),
       distinctUntilChanged(),
+    );
+  }
+
+  getCopy(symbolDir: IPosition): Promise<Copy | undefined> {
+    return firstValueFrom(
+      this.state$.pipe(
+        map((state) =>
+          state.copies.find(
+            (copy) =>
+              copy.symbol == symbolDir.symbol && copy.dir == symbolDir.dir,
+          ),
+        ),
+      ),
     );
   }
 
@@ -213,7 +228,7 @@ export class CopyStore {
 
   async syncPositionsFromOrigin() {
     // await this.syncLivePositionsFromOrigin();
-    await this.syncOpenPositionsFromOrigin();
+    // await this.syncOpenPositionsFromOrigin();
   }
 
   private async syncLivePositionsFromOrigin() {

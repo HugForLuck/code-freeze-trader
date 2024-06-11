@@ -3,6 +3,7 @@ import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
 import {
   catchError,
   distinctUntilChanged,
+  filter,
   map,
   switchMap,
   takeUntil,
@@ -17,13 +18,17 @@ import { subscribePrivate } from './subscribePrivate';
 import { authPrivate } from './utils/authPrivate.utils';
 import { IBybitPosition } from './response/position.interface';
 import { filterUniquePrice } from './utils/filterUniquePrice.utils';
+import { IWallet } from './response/wallet.interface';
+import { TOPIC } from './topic.enum';
 
 @Injectable()
 export class BybitWSService {
   ws_public_url = 'wss://stream.bybit.com/v5/public/linear';
   ws_private_url = 'wss://stream-demo.bybit.com/v5/private';
   private publicSocket$: WebSocketSubject<IBybitRequest<ITicker>>;
-  private privateSocket$: WebSocketSubject<IBybitRequest<IBybitPosition[]>>;
+  private privateSocket$: WebSocketSubject<
+    IBybitRequest<IBybitPosition[] | IWallet[]>
+  >;
   private shouldReconnectPublic$ = new Subject<void>();
   private shouldReconnectPrivate$ = new Subject<void>();
 
@@ -103,7 +108,22 @@ export class BybitWSService {
         console.log('getUserLivePositions ERROR', error);
         return of(undefined);
       }),
-      map((positions) => positions?.data),
+      filter((response) => response?.topic == TOPIC.POSITION),
+      map((positions) => positions?.data as IBybitPosition[]),
+      distinctUntilChanged(),
+    );
+  }
+
+  getUserWallet$(): Observable<IWallet | undefined> {
+    return this.privateSocket$.pipe(
+      catchError((error) => {
+        console.log('getUserLivePositions ERROR', error);
+        return of(undefined);
+      }),
+      filter((response) => response?.topic == TOPIC.WALLET),
+      map((positions) =>
+        positions?.data ? (positions?.data[0] as IWallet) : undefined,
+      ),
       distinctUntilChanged(),
     );
   }
